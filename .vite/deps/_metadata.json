@@ -1,0 +1,70 @@
+{
+  "hash": "a27d2bb5",
+  "configHash": "ad32993d",
+  "lockfileHash": "0096558f",
+  "browserHash": "7917f690",
+  "optimized": {
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "ad63b1e1",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "cd8ff735",
+      "needsInterop": false
+    },
+    "vuex": {
+      "src": "../../node_modules/vuex/dist/vuex.esm-bundler.js",
+      "file": "vuex.js",
+      "fileHash": "d369731d",
+      "needsInterop": false
+    },
+    "ant-design-vue": {
+      "src": "../../node_modules/ant-design-vue/es/index.js",
+      "file": "ant-design-vue.js",
+      "fileHash": "3fd2066b",
+      "needsInterop": false
+    },
+    "vuex-persistedstate": {
+      "src": "../../node_modules/vuex-persistedstate/dist/vuex-persistedstate.es.js",
+      "file": "vuex-persistedstate.js",
+      "fileHash": "0476b94e",
+      "needsInterop": false
+    },
+    "ant-design-vue/es/vc-input/inputProps.js": {
+      "src": "../../node_modules/ant-design-vue/es/vc-input/inputProps.js",
+      "file": "ant-design-vue_es_vc-input_inputProps__js.js",
+      "fileHash": "48ffa859",
+      "needsInterop": false
+    },
+    "jwt-decode": {
+      "src": "../../node_modules/jwt-decode/build/esm/index.js",
+      "file": "jwt-decode.js",
+      "fileHash": "bab09d49",
+      "needsInterop": false
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "f7950865",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AYVSL3LM": {
+      "file": "chunk-AYVSL3LM.js"
+    },
+    "chunk-Q4GJSH4P": {
+      "file": "chunk-Q4GJSH4P.js"
+    },
+    "chunk-ZOYFGJV5": {
+      "file": "chunk-ZOYFGJV5.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}
