@@ -41,7 +41,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: [git-runner-fe]
+    runs-on: [fe-runner]
     
     steps:
       - name: Checkout code
