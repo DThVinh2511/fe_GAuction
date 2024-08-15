@@ -2,7 +2,6 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
     container_name: frontend-container
     ports:
       - "5173:80"
