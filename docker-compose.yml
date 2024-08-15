@@ -3,6 +3,7 @@ services:
     build:
       context: .
     container_name: frontend-container
+    image: vinhdt/auction-vuejs:latest
     ports:
       - "5173:80"
     restart: unless-stopped
