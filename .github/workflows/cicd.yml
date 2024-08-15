@@ -61,7 +61,7 @@ jobs:
   
   show-logs:
     needs: deploy
-    runs-on: [git-runner]
+    runs-on: [fe-runner]
     steps:
       - name: show spring boot logs
         run: docker-compose logs -f frontend
