@@ -1,27 +1,32 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const api = axios.create({
-   baseURL: "https://admin.auction.id.vn/auction",
-   headers: {
-      "Content-Type": "application/json",
-   },
-   timeout: 5000,
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 10000,
 });
 
-api.interceptors.request.use((config) => {
-   const token = localStorage.getItem("token");
-   if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-   }
-   return config;
+// Add an interceptor to include the token in the header for every request
+api.interceptors.request.use((request) => {
+  const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+  if (token) {
+    request.headers.Authorization = `Bearer ${token}`;
+  }
+  return request;
 });
 
+// Add an interceptor to handle errors
 api.interceptors.response.use(
-   (response) => response,
-   (error) => {
-      console.error("An error occurred:", error);
-      return Promise.reject(error);
-   }
+  (response) => response,
+  (error) => {
+    // Handle error here
+    console.error("An error occurred:", error);
+    return Promise.reject(error);
+  }
 );
 
 export default api;
