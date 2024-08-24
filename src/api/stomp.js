@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 /// - stateful functions (functions that refer to global variables) are declared with function expressions
 /// - stateless functions are declared with arrow functions
 
-const WS_URL = import.meta.env.VITE_WS_URL;
+const WS_URL = process.env.VITE_WS_URL;
 
 /**
  * @type {StompSession | null}
