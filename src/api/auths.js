@@ -4,7 +4,6 @@ import { message } from 'ant-design-vue';
 const authApi = {
   async login(email, password) {
     try {
-
       const response = await api.post('/v1/auths/authenticate', { email, password });
       //  message.success(response.data.message);
       return response.data.data;
