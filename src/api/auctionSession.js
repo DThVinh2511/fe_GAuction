@@ -83,14 +83,14 @@ async function joinAuctionRoom(auctionId, callbacks) {
                         subscribeComment(auctionId, session);
                     }
                     sessionActive = true;
-                    session.onStart?.(body);
+                    session.onStart?.(body.data);
                 }
                 if (type === "end") {
                     sessionActive = false;
                     if (session.isJoined) {
                         session.leave();
                     }
-                    session.onEnd?.(body);
+                    session.onEnd?.(body.data);
                 }
             });
 
@@ -113,10 +113,6 @@ async function joinAuctionRoom(auctionId, callbacks) {
 }
       
 async function leaveAuctionRoom(auctionId) {
-    console.log('registry: ', auctionJoinRegistry[auctionId]);
-    // if (!auctionJoinRegistry[auctionId]) {
-    //     return;
-    // }
     stompApi.unsubscribe(`/topic/auction/${auctionId}/bids`);
     stompApi.unsubscribe(`/topic/auction/${auctionId}/comments`);
     stompApi.unsubscribe(`/topic/auction/${auctionId}/notifications`);

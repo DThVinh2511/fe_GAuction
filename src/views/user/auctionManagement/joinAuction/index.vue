@@ -63,11 +63,11 @@
       <div class="w-full md:w-1/3 bg-white p-4 flex flex-col">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Latest auction updates</h2>
         <div class="border-b-2 border-gray-300 mb-4"></div>
-        <div class="overflow-y-scroll max-h-96 custom-scrollbar">
-          <a-card v-for="(history, index) in historyList" :key="index" hoverable
-            class="h-full bg-white shadow-lg rounded-lg mb-2">
-            <a-card-meta :title="history.title" :description="history.description"></a-card-meta>
-          </a-card>
+        <div class="overflow-y-scroll h-full custom-scrollbar p-2 flex justify-end flex-col">
+          <div v-for="(bid, index) in bids" :key="index" hoverable
+            class="h-10 text-sm w-full flex justify-start items-center shadow-md rounded-lg mb-2 p-2 ">
+            <a-card-meta :title="bid.name + ' bid ' + bid.price + ' VND'"></a-card-meta>
+          </div>
         </div>
       </div>
 
@@ -87,7 +87,7 @@
           </a-card>
         </div>
         <a-list item-layout="horizontal" :data-source="comments"
-          class="p-5 overflow-y-scroll max-h-96 custom-scrollbar">
+          class="p-5 overflow-y-scroll custom-scrollbar">
           <template #renderItem="{ item }">
             <a-list-item :key="item.id">
               <a-list-item-meta :description="item.content">
@@ -123,6 +123,7 @@ import { jwtDecode } from 'jwt-decode';
 import sessionApi from '../../../../api/auctionSession';
 import auctionApi from '../../../../api/auctions';
 import authApi from '../../../../api/auths';
+import { message } from 'ant-design-vue';
 
 const IMAGE_PREFIX = import.meta.env.VITE_IMAGE_PREFIX;
 
@@ -316,13 +317,10 @@ function handlePlaceBid() {
     return;
   }
   const newPrice = parsePrice(yourPriceInput.value);
-  sessionApi.bid(auction.value.id, newPrice);
+  sessionApi.bid(auction.value.id, newPrice).catch((err) => {
+    message.error(err.message);
+  });
 };
-
-function updateBid(bid) {
-  currentPrice.value = bid.bid;
-  isCurrentPriceYours.value = bid.userId === userId;
-}
 
 function parsePrice(priceStr) {
   return (parseInt(priceStr.replace(/\./g, '')) || 0);
@@ -335,6 +333,33 @@ function formatPrice(priceNum) {
 
 
 
+const bids = ref([]);
+
+async function updateBid(bid) {
+  currentPrice.value = bid.bid;
+  if (!bid.userId) {
+    return;
+  }
+  bids.value.push({name: "xxx", price: bid.bid});
+  const index = bids.value.length - 1;
+  
+  if (isCurrentPriceYours.value = bid.userId === userId) {
+    bids.value[index] = {
+      name: 'You',
+      price: bid.bid,
+    }
+  } else {
+    authApi.getAnotherInfo(bid.userId).then((user) => {
+      bids.value[index] = {
+        name: user.fullName,
+        price: bid.bid,
+      }
+    });
+  }
+}
+
+
+
 const comments = ref([]);
 
 const myCommentInput = ref('');
@@ -343,7 +368,9 @@ function handleComment() {
   if (!myCommentInput.value) {
     return;
   }
-  sessionApi.comment(auctionId, myCommentInput.value);
+  sessionApi.comment(auctionId, myCommentInput.value).catch((err) => {
+    message.error(err.message);
+  });
   myCommentInput.value = '';
 };
 
@@ -365,6 +392,10 @@ function addComment(data) {
 
 
 const notifications = ref([]);
+
+const addNotification = (data) => {
+  notifications.value.push(data);
+};
 
 
 function handleUnload() {
@@ -401,16 +432,22 @@ onMounted(() => {
                 updateBid(res.data);
             });
         },
-        onEnd: () => {
+        onEnd: (winnerId) => {
+            console.log(winnerId);
             sessionState.value = "FINISHED";
             console.log('auction ended');
+            message.success(`Auction has ended`);
+            if (winnerId === userId) {
+                message.success(`Congratulations! You have won the auction`);
+            } else if (winnerId != null) {
+                authApi.getAnotherInfo(winnerId).then((user) => {
+                    message.success(`${user.fullName} has won the auction`);
+                });
+            }
         },
         onBid: updateBid,
         onComment: addComment,
-        onNotification: (data) => {
-            console.log('notification', data);
-            notifications.value.push(data);
-        },
+        onNotification: addNotification
     };
 
     const join = () => sessionApi.joinAuctionRoom(auctionId, callbacks)
@@ -420,6 +457,8 @@ onMounted(() => {
           sessionApi.leaveAuctionRoom(auctionId).finally(() => {
             setTimeout(join, 1000);
           });
+        } else {
+          message.error('loi tham gia phong dau gia');
         }
       }
       console.error(err);

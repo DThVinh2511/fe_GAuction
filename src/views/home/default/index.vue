@@ -147,7 +147,7 @@
                 {{ product.quantity }}
               </span>
               <template #cover>
-                <img class="h-52 w-52" alt="example" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                <img class="h-52 w-52" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
                   product.image.split(', ')[0]
                   " />
               </template>
@@ -162,7 +162,7 @@
               <button @click.stop="toggleFavorite(product)" :disabled="isFavorited(product)"
                 class="flex items-center justify-center p-2 rounded mt-4 w-full "
                 :class="{ 'bg-pink-200 hover:bg-pink-400': !isFavorited(product), 'bg-gray-200 cursor-not-allowed': isFavorited(product) }">
-                <img src="../../../assets/icon/like.svg" alt="Interested" class="w-6 h-6 mr-1" />
+                <img src="../../../assets/icon/like.svg" class="w-6 h-6 mr-1" />
                 Add to Favorites
               </button>
             </a-card>
@@ -183,7 +183,7 @@
             <a-card hoverable @click="selectProduct(product, index)"
               class="h-full transform hover:scale-105 transition duration-300 ease-in-out">
               <span
-                class="absolute top-4 left-4 flex justify-center items-center  bg-white w-auto text-black font-bold py-1 px-1 rounded">
+                class="absolute top-4 left-4 flex justify-center items-center bg-white w-auto text-black font-bold p-2 rounded">
                 <img :src="product.isFavorite
                   ? HeartFilled
                   : Heart
@@ -191,7 +191,7 @@
                 {{ product.quantity }}
               </span>
               <template #cover>
-                <img class="h-52 w-52" alt="example" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                <img class="h-52 w-52" alt="sample" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
                   product.image.split(', ')[0]
                   " />
               </template>
@@ -205,7 +205,7 @@
               <button @click.stop="toggleFavorite(product)" :disabled="isFavorited(product)"
                 class="flex items-center justify-center p-2 rounded mt-4 w-full "
                 :class="{ 'bg-pink-200 hover:bg-pink-400': !isFavorited(product), 'bg-gray-200 cursor-not-allowed': isFavorited(product) }">
-                <img src="../../../assets/icon/like.svg" alt="Interested" class="w-6 h-6 mr-1" />
+                <img src="../../../assets/icon/like.svg" class="w-6 h-6 mr-1" />
                 Add to Favorites
               </button>
             </a-card>
