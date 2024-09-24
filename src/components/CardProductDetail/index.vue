@@ -74,7 +74,7 @@ const updateArrayImage = () => {
       .split(", ")
       .map(
         (img) =>
-          `https://res.cloudinary.com/dorl0yxpe/image/upload/` + img.trim()
+          `${import.meta.env.VITE_IMAGE_PREFIX}` + img.trim()
       );
     console.log(arrayImage.value);
   }

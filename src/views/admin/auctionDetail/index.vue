@@ -95,7 +95,7 @@ const getProduct = async () => {
     const response = await productApi.getProductById(props.auction.product_id);
     product = response;
     const imgs = product.image;
-    arrayImage.value = imgs.split(', ').map(img => `https://res.cloudinary.com/dorl0yxpe/image/upload/` + img.trim());
+    arrayImage.value = imgs.split(', ').map(img => `${import.meta.env.VITE_IMAGE_PREFIX}` + img.trim());
     console.log(arrayImage.value);
   } catch (error) {
     console.error(error);

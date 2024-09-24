@@ -66,7 +66,7 @@
         <div class="overflow-y-scroll h-full custom-scrollbar p-2 flex justify-end flex-col">
           <div v-for="(bid, index) in bids" :key="index" hoverable
             class="h-10 text-sm w-full flex justify-start items-center shadow-md rounded-lg mb-2 p-2 ">
-            <a-card-meta :title="bid.name + ' bid ' + bid.price + ' VND'"></a-card-meta>
+            <a-card-meta :title="bid.name + ' bid ' + bid.price.toLocaleString('vi-VN') + ' VND'"></a-card-meta>
           </div>
         </div>
       </div>
@@ -77,17 +77,19 @@
         <img v-else src="../../../../assets/icon/hide-comment.svg" alt="Toggle" class="w-6 h-6" />
       </button>
       <div v-if="showComments"
-        class="z-40 fixed top-24 right-0 w-96 h-5/6 bg-white p-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400 overflow-y-scroll custom-scrollbar"
+        class="z-40 fixed top-24 right-2 w-96 max-h-[500px] min-h-[300px] bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400 overflow-y-scroll custom-scrollbar"
         :class="{ 'translate-x-0': showComments, 'translate-x-full': !showComments }">
+        <div class="p-3 sticky top-0 bg-white z-10">
+          <h2 class="text-xl font-semibold text-gray-700 mb-0">Comments</h2>
+        </div>
         <div class="p-2">
-          <h2 class="text-xl font-semibold text-gray-700 mb-6">Comments</h2>
           <a-card v-for="(noti, index) in notifications" :key="index" hoverable
             class="h-96 bg-white shadow-lg rounded-lg mb-2 custom-scrollbar">
             <a-card-meta :title="index + 1" :description="noti.content"></a-card-meta>
           </a-card>
         </div>
         <a-list item-layout="horizontal" :data-source="comments"
-          class="p-5 overflow-y-scroll custom-scrollbar">
+          class="mt-5 overflow-y-scroll custom-scrollbar min-h-[200px]" id="commentsContainer">
           <template #renderItem="{ item }">
             <a-list-item :key="item.id">
               <a-list-item-meta :description="item.content">
@@ -101,7 +103,7 @@
             </a-list-item>
           </template>
         </a-list>
-        <div class="flex justify-center items-center absolute w-80 bottom-6 ml-3 mt-4 rounded space-x-2">
+        <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
           <input v-model="myCommentInput" @keydown.enter="handleComment" type="text" placeholder="Enter your comment..."
             class="flex-1 w-full ml-3 border p-2 rounded-lg" />
           <button @click="handleComment" class="bg-green-300 text-white p-2 rounded-lg hover:bg-green-400">
@@ -124,6 +126,7 @@ import sessionApi from '../../../../api/auctionSession';
 import auctionApi from '../../../../api/auctions';
 import authApi from '../../../../api/auths';
 import { message } from 'ant-design-vue';
+import { nextTick } from 'vue';
 
 const IMAGE_PREFIX = import.meta.env.VITE_IMAGE_PREFIX;
 
@@ -187,7 +190,6 @@ function nextImage() {
   }
 };
 
-
 const baseDate = new Date();
 let diffseconds = 0;
 const now = ref(baseDate);
@@ -198,6 +200,7 @@ const timeUntilStart = computed(() => {
   const startTime = parse(auction.value.startTime, 'yyyy-MM-dd HH:mm:ss', new Date());
   return formatTimeLeft(now.value, startTime);
 })
+
 const timeLeft = computed(() => {
   if (!auction.value.endTime) {
     return null;
@@ -231,8 +234,6 @@ function formatTimeLeft(from, to) {
     return unit.toString().padStart(2, '0');
   }
 }
-
-
 
 const sessionState = ref(null);
 const startingPrice = computed(() => auction.value.startBid);
@@ -358,11 +359,18 @@ async function updateBid(bid) {
   }
 }
 
-
-
 const comments = ref([]);
 
 const myCommentInput = ref('');
+
+watchEffect(() => {
+  nextTick(() => {
+    const container = document.getElementById("commentsContainer");
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+});
 
 function handleComment() {
   if (!myCommentInput.value) {
@@ -404,6 +412,7 @@ function handleUnload() {
 };
 
 onMounted(() => {
+  // scrollToBottom();
   auctionApi.getAuctionById(auctionId)
     .then((res) => {
         console.log(res)

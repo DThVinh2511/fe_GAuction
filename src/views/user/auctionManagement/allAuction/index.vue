@@ -149,7 +149,7 @@ const nextSlide = () => {
 
 
 const getUrlImage = (image) => {
-  return `https://res.cloudinary.com/dorl0yxpe/image/upload/` + image.split(', ')[0];
+  return `${import.meta.env.VITE_IMAGE_PREFIX}` + image.split(', ')[0];
 }
 
 const getUrlAvatar = async (ownerId) => {

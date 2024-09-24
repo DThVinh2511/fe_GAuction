@@ -108,7 +108,7 @@ const renderAuction = async (pageCurrent,pageSize) => {
     for (let auction of auctions.content) {
       promises.push(productApi.getProductById(auction.product_id).then((response) => {
         auction.product = response;
-        auction.productImage = `https://res.cloudinary.com/dorl0yxpe/image/upload/` + response.image.split(', ')[0];
+        auction.productImage = `${import.meta.env.VITE_IMAGE_PREFIX}` + response.image.split(', ')[0];
       }));
     }
     await Promise.all(promises);

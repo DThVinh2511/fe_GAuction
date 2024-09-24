@@ -75,7 +75,7 @@ const arrayImage = ref([]);
 
 const updateArrayImage = () => {
   if (props.auction) {
-    arrayImage.value = props.auction.product.image.split(', ').map(img => `https://res.cloudinary.com/dorl0yxpe/image/upload/` + img.trim());
+    arrayImage.value = props.auction.product.image.split(', ').map(img => `${import.meta.env.VITE_IMAGE_PREFIX}` + img.trim());
     console.log(arrayImage.value)
   }
 }

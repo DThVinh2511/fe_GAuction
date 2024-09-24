@@ -57,13 +57,13 @@
 
           <div class="mb-5">
             <label for="startBid" class="block text-gray-700 mb-3 font-semibold">Start Bid</label>
-            <input type="number" id="startBid" v-model="auction.start_bid"
+            <input id="startBid" v-model="startBid" type="text" @input="formatedStartBid"
               class="form-input w-full border border-gray-300 rounded-md px-2 py-2" />
           </div>
 
           <div class="mb-5">
             <label for="pricePerStep" class="block text-gray-700 mb-3 font-semibold">Price per Step</label>
-            <input type="number" id="pricePerStep" v-model="auction.price_per_step"
+            <input id="pricePerStep" v-model="pricePerStep" type="text" @input="formatedPricePerStep"
               class="form-input w-full border border-gray-300 rounded-md px-2 py-2" />
           </div>
 
@@ -90,6 +90,8 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const store = useStore();
+const startBid = ref('0');
+const pricePerStep = ref('0');
 
 const product = store.getters.getProductDetail;
 
@@ -110,6 +112,8 @@ const submitAuction = async () => {
   loading.value = true;
   try {
     auction.value.product_id = product.id;
+    auction.value.start_bid = parsePrice(startBid.value);
+    auction.value.price_per_step = parsePrice(pricePerStep.value);
     const response = await auctionApi.addAuction(auction.value);
     store.commit('setProductDetail', '');
   } catch (error) {
@@ -134,4 +138,60 @@ const resetForm = () => {
     }
   };
 };
+function formatedStartBid(event) {
+  const cleaned = event.target.value.replace(/\D/g, '');
+  const newPrice = parsePrice(cleaned);
+  const oldCursorPos = event.target.selectionStart;
+  const digitsToTheRight = event.target.value.substring(oldCursorPos).match(/\d/g)?.length || 0;
+
+  const formatted = formatPrice(newPrice);
+  let newCursorPos = formatted.length;
+  let dgcount = 0;
+  while (dgcount < digitsToTheRight && newCursorPos > 0) {
+    if (formatted[newCursorPos - 1].match(/\d/)) {
+      dgcount++;
+    }
+    newCursorPos--;
+  }
+  if (dgcount < digitsToTheRight) {
+    newCursorPos = formatted.length;
+  }
+  startBid.value = formatted;
+  setTimeout(() => {
+    event.target.setSelectionRange(newCursorPos, newCursorPos);
+  }, 0);
+};
+function formatedPricePerStep(event) {
+  const cleaned = event.target.value.replace(/\D/g, '');
+  const newPrice = parsePrice(cleaned);
+  const oldCursorPos = event.target.selectionStart;
+  const digitsToTheRight = event.target.value.substring(oldCursorPos).match(/\d/g)?.length || 0;
+
+  const formatted = formatPrice(newPrice);
+  let newCursorPos = formatted.length;
+  let dgcount = 0;
+  while (dgcount < digitsToTheRight && newCursorPos > 0) {
+    if (formatted[newCursorPos - 1].match(/\d/)) {
+      dgcount++;
+    }
+    newCursorPos--;
+  }
+  if (dgcount < digitsToTheRight) {
+    newCursorPos = formatted.length;
+  }
+  pricePerStep.value = formatted;
+  setTimeout(() => {
+    event.target.setSelectionRange(newCursorPos, newCursorPos);
+  }, 0);
+};
+
+function parsePrice(priceStr) {
+  return (parseInt(priceStr.replace(/\./g, '')) || 0);
+};
+
+function formatPrice(priceNum) {
+  return priceNum == null ? "" :
+    `${priceNum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+};
+
 </script>

@@ -26,7 +26,7 @@
                 {{ product.quantity }}
               </span>
               <template #cover>
-                <img :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                <img :src="`${srcImage}` +
                   product.image.split(', ')[0]
                   " alt="Product" class="w-56 h-56 object-cover" />
               </template>
@@ -72,6 +72,7 @@ import { message } from "ant-design-vue";
 
 const router = useRouter();
 const loading = ref(true);
+const srcImage = import.meta.env.VITE_IMAGE_PREFIX;
 
 const icons = ref([
   { src: Heart },

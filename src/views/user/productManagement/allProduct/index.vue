@@ -30,7 +30,7 @@
             </div> -->
             <template #cover>
               <img class="h-64"
-                :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` + product.image.split(', ')[0]"
+                :src="`${srcImage}` + product.image.split(', ')[0]"
                 alt="No Image" />
             </template>
             <a-card-meta :title="product.name" :description="product.category">
@@ -67,7 +67,7 @@ import ProductDetailModal from '../productDetail/index.vue';
 import { useStore } from 'vuex'
 
 const loading = ref(true);
-
+const srcImage = import.meta.env.VITE_IMAGE_PREFIX;
 const store = useStore();
 const products = ref([]);
 // products.value = store.getters.getProducts;

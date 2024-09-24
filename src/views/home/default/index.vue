@@ -147,7 +147,7 @@
                 {{ product.quantity }}
               </span>
               <template #cover>
-                <img class="h-52 w-52" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                <img class="h-52 w-52" :src="`${srcImage}` +
                   product.image.split(', ')[0]
                   " />
               </template>
@@ -191,7 +191,7 @@
                 {{ product.quantity }}
               </span>
               <template #cover>
-                <img class="h-52 w-52" alt="sample" :src="`https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                <img class="h-52 w-52" alt="sample" :src="`${srcImage}` +
                   product.image.split(', ')[0]
                   " />
               </template>
@@ -227,7 +227,7 @@ import Heart from '../../../assets/icon/heart.svg';
 import HeartFilled from '../../../assets/icon/heart-filled.svg';
 import { useRouter } from 'vue-router';
 import { message } from "ant-design-vue";
-
+const srcImage = import.meta.env.VITE_IMAGE_PREFIX
 const router = useRouter();
 
 const store = useStore();
