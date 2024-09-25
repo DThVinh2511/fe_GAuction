@@ -15,11 +15,11 @@
         <a-spin size="large" />
       </div>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <div v-for="session in paginatedSessions" :key="session.id"
+        <div v-for="(session, index) in paginatedSessions" :key="index" :product="session" :index="index"
           class="bg-white shadow-lg rounded-lg cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out"
           @click="openModal(session)">
 
-          <a-card hoverable>
+          <a-card hoverable @click="selectSession(session, index)">
             <template #cover>
               <img src="../../../../assets/images/auction.jpg" alt="Session" />
             </template>
@@ -40,7 +40,14 @@
         <img src="../../../../assets/icon/next-arrow-slide.svg" alt="Next" class="w-6 h-6" />
       </button>
       <div class="flex justify-center mt-4">
-        <a-pagination v-model:current="currentPage" :total="totalSessions" :pageSize="pageSize * 2" />
+        <a-pagination
+          v-model="currentPage" 
+          :page-size="pageSizeRef"
+          :total="totalSessions" 
+          show-size-changer
+          :page-size-options="['8', '12', '16', '20']"
+          @change="handlePageChange"
+        />
       </div>
       <SessionModal :isVisible="isModalVisible" :session="selectedSession" @close="closeModal" />
     </div>
@@ -48,6 +55,9 @@
 </template>
 
 <script setup>
+import auctionApi from '../../../../api/auctions';
+import authApi from '../../../../api/auths';
+import productApi from '../../../../api/products';
 import MenuAuctionHistory from '../../../../components/MenuAuctionHistory/index.vue';
 import SessionModal from '../historyAuctionDetail/index.vue';
 import { ref, computed, reactive, onBeforeMount, watch } from 'vue';
@@ -62,10 +72,38 @@ const sessions = ref([]);
 // sessions = store.getters.getSessions;
 //sessions.push(...store.state.sessions);
 
+const selectSession = async (session, index) => {
+  try {
+    const product = await productApi.getProductById(session.product_id);
+    if(product.buyerId) {
+      const [buyer, owner] = await Promise.all([
+        authApi.getAnotherInfo(product.buyerId),
+        authApi.getAnotherInfo(product.ownerId)
+      ]); 
+      selectedSession.value = {
+        ...session,
+        product: {...product},
+        owner: {...owner},
+        buyer: {...buyer}
+      } 
+    } else {
+      const owner = await authApi.getAnotherInfo(product.ownerId);
+      selectedSession.value = {
+        ...session,
+        product: {...product},
+        owner: {...owner}
+      }
+    } 
+  } catch (error) {
+    message.error('Fetch failed');
+  }
+}
+
 
 const currentPage = ref(1);
 const pageSize = 4;
-let totalSessions = sessions.value.length;
+const pageSizeRef = ref(8);
+let totalSessions = 20;
 
 const paginatedSessions = computed(() => {
   const start = (currentPage.value - 1) * pageSize * 2;
@@ -95,20 +133,31 @@ const closeModal = () => {
 };
 
 watch(sessions, () => {
-  totalSessions = sessions.value.length;
+  totalSessions = 20;
 });
 
-onBeforeMount(async () => {
+const handlePageChange = async (page,pageSize) => {
+  currentPage.value = page;
+  pageSizeRef.value=pageSize;
+  const pageCurrent = page - 1;
+  await renderProduct(pageCurrent,pageSize);
+};
+
+const renderProduct = async (pageCurrent,pageSize) => {
   loading.value = true;
+  if(!pageSize) pageSize=8;
   try {
-    const res = await store.dispatch('getMyAuction');
-    sessions.value = store.getters.getSessions;
+    const res = await auctionApi.getAllAuctionMyWon(pageCurrent,pageSize);
+    sessions.value = res.content;
+    // console.log(products);
   } catch (error) {
-    message.error('Fetch failed');
+    console.error(error);
   } finally {
     loading.value = false;
   }
-});
+};
+
+onBeforeMount(async () => renderProduct(0));
 
 </script>
 

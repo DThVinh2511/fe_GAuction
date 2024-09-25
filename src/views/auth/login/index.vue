@@ -1,6 +1,6 @@
 <template>
   <div class="relative container mx-auto max-w-sm p-8">
-    <img src="../../../assets/images/logo.png" alt="Logo" class="h-130 h-130 -mt-10 flex items-center justify-center" />
+    <img src="../../../assets/images/logo.png" alt="Logo" class="-mt-10 flex items-center justify-center" />
     <router-link to="/home/default"
       class="flex items-center space-x-2 absolute top-0 left-0 text-gray-600 hover:text-gray-900">
       <img src="../../../assets/icon/auth-back.svg" alt="Back" class="w-6 h-6" />

@@ -52,6 +52,13 @@ const auctionApi = {
     );
     return response.data.data;
   },
+  
+  async getAllAuctionMyWon(pageNo, pageSize) {
+    const response = await api.get(
+      `/v1/auctions/get-my-won?pageNo=${pageNo}&pageSize=${pageSize}`
+    );
+    return response.data.data;
+  },
 
   async registerAuction(id) {
     const response = await api.post("/v1/auctions/" + id + "/regis-join");

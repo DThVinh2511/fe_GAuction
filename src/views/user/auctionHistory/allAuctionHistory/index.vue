@@ -6,7 +6,7 @@
     <div class="relative w-full md:w-4/5 container border-l bg-white mx-auto p-10 rounded-md shadow-lg mt-6">
       <div class="w-full max-w-md mx-auto">
         <h1 class="text-2xl font-bold text-center text-gray-800">
-          Auctions you have participated in
+          The auction you created
         </h1>
         <div class="border-b-2 border-zinc-400 mt-2 mb-8"></div>
       </div>
@@ -15,11 +15,11 @@
         <a-spin size="large" />
       </div>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <div v-for="session in paginatedSessions" :key="session.id"
+        <div v-for="(session, index) in paginatedSessions" :key="index" :product="session" :index="index"
           class="bg-white shadow-lg rounded-lg cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out"
           @click="openModal(session)">
 
-          <a-card hoverable>
+          <a-card hoverable @click="selectSession(session, index)">
             <template #cover>
               <img src="../../../../assets/images/auction.jpg" alt="Session" />
             </template>
@@ -52,6 +52,8 @@ import MenuAuctionHistory from '../../../../components/MenuAuctionHistory/index.
 import SessionModal from '../historyAuctionDetail/index.vue';
 import { ref, computed, reactive, onBeforeMount, watch } from 'vue';
 import { useStore } from 'vuex';
+import productApi from '../../../../api/products';
+import authApi from '../../../../api/auths';
 
 const store = useStore();
 
@@ -62,6 +64,33 @@ const sessions = ref([]);
 // sessions = store.getters.getSessions;
 //sessions.push(...store.state.sessions);
 
+
+const selectSession = async (session, index) => {
+  try {
+    const product = await productApi.getProductById(session.product_id);
+    if(product.buyerId) {
+      const [buyer, owner] = await Promise.all([
+        authApi.getAnotherInfo(product.buyerId),
+        authApi.getAnotherInfo(product.ownerId)
+      ]); 
+      selectedSession.value = {
+        ...session,
+        product: {...product},
+        owner: {...owner},
+        buyer: {...buyer}
+      } 
+    } else {
+      const owner = await authApi.getAnotherInfo(product.ownerId);
+      selectedSession.value = {
+        ...session,
+        product: {...product},
+        owner: {...owner}
+      }
+    } 
+  } catch (error) {
+    message.error('Fetch failed');
+  }
+}
 
 const currentPage = ref(1);
 const pageSize = 4;
