@@ -98,6 +98,7 @@
               class="w-3/4 p-2 border border-gray-300 rounded-md"
               placeholder="Enter product keyword..."
               v-model="search"
+              @keydown.enter="searchProduct"
             />
             <button
               @click="searchProduct"
@@ -204,7 +205,7 @@
                 class="h-52 w-52"
                 alt="example"
                 :src="
-                  `https://res.cloudinary.com/dorl0yxpe/image/upload/` +
+                  `${imageUrl}` +
                   product.image.split(', ')[0]
                 "
               />
@@ -275,6 +276,7 @@ const viewModalVisible = ref(false);
 const a = ref(1000);
 const loadingTop = ref(true);
 const loadingNew = ref(true);
+const imageUrl = import.meta.env.VITE_IMAGE_PREFIX;
 const productSearch = reactive({
   totalElements : 0,
   content: [],
@@ -341,18 +343,34 @@ const toggleFavorite = async(product) => {
  const search = ref('');
 const searchProduct = async() => {
   
-  const response = await productApi.searchProduct(search.value);
-  productSearch.content = response.content;
-  productSearch.totalElements=response.totalElements;
-  loadingTop.value=false;
-
+  // const response = await productApi.searchProduct(search.value);
+  // productSearch.content = response.content;
+  // productSearch.totalElements=response.totalElements;
+  // loadingTop.value=false;
+  const isLoggedIn = store.getters.getLoginState;
+  if (isLoggedIn) {
+    router.push({name : 'user-search', query: { keyword : search.value }})
+  }else {
+    router.push({ name: 'home-search', query: { keyword: search.value } });
+  }
 }
+watch(() => route.query.keyword, async (newKeyword) => {
+  if (newKeyword) {
+    loadingTop.value = true;
+    const response = await productApi.searchProduct(newKeyword);
+    productSearch.content = response.content;
+    productSearch.totalElements = response.totalElements;
+    loadingTop.value = false;
+  }
+}, { immediate: true });
 onMounted(async() => {
-  const response = await productApi.searchProduct(route.query.keyword);
-  productSearch.content = response.content;
-  productSearch.totalElements=response.totalElements;
-  loadingTop.value=false;
-  });
+  if(route.query.keyword) {
+    const response = await productApi.searchProduct(route.query.keyword);
+    productSearch.content = response.content;
+    productSearch.totalElements=response.totalElements;
+    loadingTop.value=false;
+  }
+});
 
 onUpdated (() => {
   listProductFavorite();

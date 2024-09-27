@@ -49,7 +49,7 @@
         </button>
         <div v-for="auction in paginatedAuctions" :key="auction.id"
           class="bg-white shadow-lg rounded-lg relative hover:cursor-pointer transform hover:scale-105 transition duration-300 ease-in-out"
-          @click="goToAuction(auction.id)">
+          @click="goToAuction(auction)">
           <a-card hoverable>
             <template #cover>
               <img class="h-56" :src="getUrlImage(auction.product.image)" alt="Auction_Image" />
@@ -70,10 +70,12 @@
 </template>
 
 <script setup>
+import { message } from 'ant-design-vue';
 import MenuSessionManagement from '../../../../components/MenuSessionManagement/index.vue';
 import { ref, computed, watch, onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { differenceInSeconds, parse } from 'date-fns';
 
 const loading = ref(true);
 
@@ -158,8 +160,20 @@ const getUrlAvatar = async (ownerId) => {
   return response.avatar;
 }
 
-const goToAuction = (auctionId) => {
-  router.push({ name: 'joinAuction', params: { id: auctionId } });
+const goToAuction = (auction) => {
+  const startTime = parse(auction.startTime, 'yyyy-MM-dd HH:mm:ss', new Date());
+  const currentTime = new Date();
+  // Tính sự khác biệt về giây giữa thời gian hiện tại và startTime
+  const timeDifferenceInSeconds = differenceInSeconds(currentTime, startTime);
+  if((auction.status === "CLOSED" && timeDifferenceInSeconds <= 60 && timeDifferenceInSeconds > 0) || auction.status === "IN_PROGRESS") {
+    router.push({ name: 'joinAuction', params: { id: auction.id } });
+  } else if(auction.status === "FINISHED") {
+    message.warning("Phòng đấu giá đã kết thúc");
+  } else if(auction.status === "CANCELED") {
+    message.warning("Phòng đấu giá đã bị hủy");
+  } else if(auction.status === "OPENING") {
+    message.warning("Phòng đấu giá chưa mở")
+  }
 };
 
 const renderAuction = async () => {

@@ -59,7 +59,8 @@
             <div class="flex items-center justify-center mt-4">
               <input type="text" class="w-3/4 p-2 border border-gray-300 rounded-md"
                 placeholder="Enter product keyword..."
-                v-model="search" />
+                v-model="search"
+                @keydown.enter="searchProduct" />
               <button @click="searchProduct" class="ml-2 p-2 bg-blue-50 hover:bg-teal-200 rounded-full outline-gray-400 shadow-lg">
                 <img src="../../../assets/icon/search.svg" alt="Search" class="w-5 h-5" />
               </button>
@@ -244,7 +245,6 @@ const getTopProducts = async () => {
   loadingTop.value = true;
   try {
     const response = await productApi.getTopProducts();
-    console.log(response);
     // topProducts = response;
     topProducts.length = 0;
     topProducts.push(...response);
@@ -260,10 +260,8 @@ const getNewProducts = async () => {
   loadingNew.value = true;
   try {
     const response = await productApi.getNewProducts();
-    console.log(response.content);
     newProducts.length = 0;
     newProducts.push(...response.content);
-    console.log(newProducts);
   } catch (error) {
     console.log(error);
   } finally {
@@ -333,15 +331,14 @@ const toggleFavorite = async (product) => {
    } catch (error) {
     message.error("You must login!");
    }
- 
- };
+};
 
- const search = ref('');
- const searchProduct = () => {
+const search = ref('');
+const searchProduct = () => {
   const isLoggedIn = store.getters.getLoginState;
 
   if (isLoggedIn) {
-  router.push({name : 'user-search', query: { keyword : search.value }})
+    router.push({name : 'user-search', query: { keyword : search.value }})
   }else {
     router.push({ name: 'home-search', query: { keyword: search.value } });
   }
@@ -353,7 +350,10 @@ onMounted(() => {
 });
 
 onUpdated(() => {
-  listProductFavorite();
+  const isLoggedIn = store.getters.getLoginState;
+  if(isLoggedIn) {
+    listProductFavorite();
+  }
 });
 
 const listProductFavorite = async() => {
@@ -361,13 +361,13 @@ const listProductFavorite = async() => {
   topProducts.forEach(product => {
     if(res.includes(product.productId)){
       product.isFavorite=true;
-      console.log(product.isFavorite)
+      // console.log(product.isFavorite)
     }
   })
   newProducts.forEach(product => {
     if(res.includes(product.productId)){
       product.isFavorite=true;
-      console.log(product.isFavorite)
+      // console.log(product.isFavorite)
     }
   })
   

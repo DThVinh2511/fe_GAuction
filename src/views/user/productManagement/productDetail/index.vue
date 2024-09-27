@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center"
     @click="closeModal">
-    <div class="bg-white rounded-lg shadow-lg p-6 mt-20 w-5/6 h-[80vh] overflow-y-auto h- relative" @click.stop>
+    <div class="bg-white rounded-lg shadow-lg p-6 mt-20 w-5/6 overflow-y-auto h- relative" @click.stop>
       <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
         <img src="../../../../assets/icon/cancel.svg" alt="Close" class="w-6 h-6" />
       </button>
@@ -11,8 +11,11 @@
         <div class="lg:w-1/2 relative">
           <div class="w-full h-full overflow-hidden rounded-md">
             <div class="mr-10">
-              <img v-for="(image, index) in arrayImage" :key="index" :src='image' alt="Image"
-                v-show="index === currentImageIndex" class="h-max w-max" />
+              <div class="flex justify-center items-center w-full bg-gray-100 p-1">
+                <img v-for="(image, index) in arrayImage" :key="index" :src="image" alt="Image"
+                    v-show="index === currentImageIndex" 
+                    class="object-fill h-200 w-300 rounded-[10px]" />
+              </div>
               <button @click="prevImage"
                 class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 p-2 rounded-full">
                 <img src="../../../../assets/icon/prev-arrow-slide.svg" alt="Previous" class="w-6 h-6" />
@@ -118,3 +121,4 @@ const closeModal = () => {
   emit('close');
 };
 </script>
+<style lang="scss" src="./style.scss" scoped />

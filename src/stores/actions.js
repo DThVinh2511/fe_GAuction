@@ -18,6 +18,7 @@ export default {
       const response = await authApi.login(email, password);
 
       localStorage.setItem("token", response.token);
+      localStorage.setItem("refreshToken", response.refreshToken);
       const decodedToken = jwtDecode(response.token);
       commit("setUser", { id: decodedToken.id, email: decodedToken.sub });
       commit("setLoginState", true);
