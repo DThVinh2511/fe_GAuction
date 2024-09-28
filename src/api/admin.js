@@ -85,9 +85,20 @@ const adminApi = {
       message.error(error.response.data.message);
       throw error;
     }
+  },
+  
+  async getBidAuction(id, status) {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.get(`/v1/auctions/bid?auction_id=${id}&auction_status=${status}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data.data;
+    } catch(error) {
+      message.error(error.response.data.message);
+      throw error;
+    }
   }
-
-
 };
 
 export default adminApi;

@@ -52,6 +52,11 @@
           <p><strong>End Time:</strong> {{ auction.end_time }}</p>
         </div>
       </div>
+      <button @click="viewDetail(auction)"
+        class="my-4 w-full flex items-center justify-center p-2 bg-blue-50 text-black font-bold rounded-md hover:bg-teal-200 outline-gray-400 shadow-lg">
+        <img src="../../../assets/icon/view-details-2.svg" class="w-6 h-6 mr-3" />
+        View Detail
+      </button>
       <button v-if="auction.status === 'PENDING'" @click="acceptAuction"
         class="my-4 w-full flex items-center justify-center p-2 bg-blue-50 text-black font-bold rounded-md hover:bg-teal-200 outline-gray-400 shadow-lg">
         <img src="../../../assets/icon/accept.svg" class="w-6 h-6 mr-3" />
@@ -75,6 +80,7 @@
 import { defineProps, defineEmits, ref, reactive, onMounted, watch } from 'vue';
 import productApi from '../../../api/products.js';
 import adminApi from '../../../api/admin.js';
+import router from '../../../router/index.js';
 
 const loading = ref(false);
 
@@ -121,6 +127,10 @@ const acceptAuction = async () => {
     loading.value = false;
   }
 };
+
+const viewDetail = (auction) => {
+  router.push({ name: 'auctionViewDetail', params: { id: auction.id } });
+}
 
 const closeModal = () => {
   emit('close');

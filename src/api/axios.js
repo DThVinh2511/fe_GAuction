@@ -34,7 +34,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response.status === 401 && !originalRequest._retry && error.response.data.message === "ExpiredToken") {
       if (isTokenRefreshing) {
         // If already refreshing token, wait for the existing refresh process to finish
         await refreshTokenPromise;
