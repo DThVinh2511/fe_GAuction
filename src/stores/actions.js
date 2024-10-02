@@ -53,8 +53,9 @@ export default {
       commit("setProducts", []);
       commit("setAuction",[]);
       commit("setSessions", []);
-      localStorage.removeItem("token");
-      sessionStorage.clear();
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("refreshToken");
+      // sessionStorage.clear();
       stompApi.teardown();
       return promise;
     } catch (error) {

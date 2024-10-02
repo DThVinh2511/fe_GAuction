@@ -25,8 +25,6 @@ api.interceptors.request.use((request) => {
 });
 
 // Add an interceptor to handle errors
-let isTokenRefreshing = false; // Flag to check if token is refreshing
-let refreshTokenPromise = null; // To store the refresh token promise
 let hasShownSessionExpiredMessage = false; // To ensure the message is shown only once
 
 api.interceptors.response.use(
@@ -35,64 +33,64 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response.status === 401 && !originalRequest._retry && error.response.data.message === "ExpiredToken") {
-      if (isTokenRefreshing) {
-        // If already refreshing token, wait for the existing refresh process to finish
-        await refreshTokenPromise;
-        originalRequest.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
-        return axios(originalRequest);
-      }
-
       originalRequest._retry = true;
-      isTokenRefreshing = true;
+      console.log(originalRequest);
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        const response = await axios.post(`${API_BASE_URL}/v1/auths/refresh`, {
+          refresh_token: refreshToken,
+        });
 
+        const newAccessToken = response.data.data.token;
+        const newRefreshToken = response.data.data.refreshToken;
+
+        localStorage.setItem("token", newAccessToken);
+        localStorage.setItem("refreshToken", newRefreshToken);
+        const decodedToken = jwtDecode(newAccessToken);
+        store.commit('setUser', decodedToken.sub);
+        store.commit('setLoginState', true);
+        if (decodedToken.scope === 'ROLE_ADMIN') {
+          store.commit('setAdmin', true);
+        }
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        if(originalRequest.url === "/v1/auths/logout") {
+          let data = originalRequest.data;
+          let dataObj = JSON.parse(data);
+          dataObj.token = newAccessToken;
+          originalRequest.data = JSON.stringify(dataObj);
+        }
+        // Retry the failed request with the new token
+        return axios(originalRequest);
+      } catch (refreshError) {
+        // Xóa local storage nếu refresh token không thành công
+        localStorage.clear();
+        sessionStorage.clear();
+        store.commit('setUser', []);
+        store.commit('setLoginState', false);
+        store.commit('setAdmin', false);
+        if (!hasShownSessionExpiredMessage) {
+          setTimeout(() => {
+            message.error("Phiên đăng nhập đã hết hạn!");
+          }, 1000); // Only show once
+          hasShownSessionExpiredMessage = true;
+        }
+        router.push("/login");
+        reject("Phiên đăng nhập đã hết hạn");
+      }
+    } else if(error.response.data.message === "ExpiredToken" || error.response.data.message === "Unauthenticated") {
+      localStorage.clear();
+      sessionStorage.clear();
+      store.commit('setUser', []);
+      store.commit('setLoginState', false);
+      store.commit('setAdmin', false);
       if (!hasShownSessionExpiredMessage) {
-        message.error("Phiên đăng nhập đã hết hạn"); // Only show once
+        setTimeout(() => {
+          message.error("Phiên đăng nhập đã hết hạn!");
+        }, 1000); // Only show once
         hasShownSessionExpiredMessage = true;
       }
-
-      refreshTokenPromise = new Promise(async (resolve, reject) => {
-        try {
-          const refreshToken = localStorage.getItem('refreshToken');
-          const response = await axios.post(`${API_BASE_URL}/v1/auths/refresh`, {
-            refresh_token: refreshToken,
-          });
-
-          const newAccessToken = response.data.data.token;
-          const newRefreshToken = response.data.data.refreshToken;
-
-          localStorage.setItem("token", newAccessToken);
-          localStorage.setItem("refreshToken", newRefreshToken);
-          const decodedToken = jwtDecode(newAccessToken);
-          store.commit('setUser', decodedToken.sub);
-          store.commit('setLoginState', true);
-
-          if (decodedToken.scope === 'ROLE_ADMIN') {
-            store.commit('setAdmin', true);
-          }
-
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          resolve(newAccessToken);
-
-          // Retry the failed request with the new token
-          return axios(originalRequest);
-        } catch (refreshError) {
-          localStorage.clear();
-          sessionStorage.clear();
-          store.commit('setUser', []);
-          store.commit('setLoginState', false);
-          store.commit('setAdmin', false);
-          router.push("/login");
-          reject("Phiên đăng nhập đã hết hạn");
-        } finally {
-          isTokenRefreshing = false;
-          refreshTokenPromise = null;
-          hasShownSessionExpiredMessage = false; // Reset after handling
-        }
-      });
-
-      return refreshTokenPromise;
+      router.push("/login");
     }
-
     return Promise.reject(error);
   }
 );

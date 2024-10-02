@@ -245,10 +245,8 @@ const getTopProducts = async () => {
   loadingTop.value = true;
   try {
     const response = await productApi.getTopProducts();
-    // topProducts = response;
     topProducts.length = 0;
     topProducts.push(...response);
-    //topProducts.splice(0, topProducts.length, ...response);
   } catch (error) {
     console.log(error);
   } finally {
@@ -283,30 +281,11 @@ const nextSlide = () => {
 const selectProduct = async (product, index) => {
   selectedProduct.value = product;
   a.value = index;
-  // store.commit('setProductDetail',
-  //     {
-  //         id: product.productId,
-  //         name: product.name,
-  //         category: product.category,
-  //         description: product.description,
-  //         images: product.image,
-  //         owner: product.owner,
-  //     }
-  // );
   viewModalVisible.value = true;
 };
 
 const closeProductDetailModal = () => {
   viewModalVisible.value = false;
-  // store.commit('setProductDetail',
-  //     {
-  //         id: '',
-  //         name: '',
-  //         category: '',
-  //         description: '',
-  //         images: '',
-  //         owner: '',
-  //     });
 };
 
 const isFavorited = (product) => {
@@ -314,16 +293,6 @@ const isFavorited = (product) => {
 }
 
 const toggleFavorite = async (product) => {
-  //  product.isFavorite = !product.isFavorite;
-  //  if (product.isFavorite) {
-  //      product.quantity += 1;
-  //      await productApi.interestProduct(product.productId);
-
-  //    } else {
-  //      product.quantity -= 1;
-  //      // await productApi.UnInterestProduct(product.productId);
-  //    }
-
   try {
     const response = await productApi.interestProduct(product.productId);
     product.isFavorite = !product.isFavorite;
@@ -350,27 +319,26 @@ onMounted(() => {
 });
 
 onUpdated(() => {
-  const isLoggedIn = store.getters.getLoginState;
-  if(isLoggedIn) {
     listProductFavorite();
-  }
 });
 
 const listProductFavorite = async() => {
-  const res = await productApi.favoriteProduct();
-  topProducts.forEach(product => {
-    if(res.includes(product.productId)){
-      product.isFavorite=true;
-      // console.log(product.isFavorite)
-    }
-  })
-  newProducts.forEach(product => {
-    if(res.includes(product.productId)){
-      product.isFavorite=true;
-      // console.log(product.isFavorite)
-    }
-  })
-  
+  const isLoggedIn = store.getters.getLoginState;
+  if(isLoggedIn) {
+    const res = await productApi.favoriteProduct();
+    topProducts.forEach(product => {
+      if(res.includes(product.productId)){
+        product.isFavorite=true;
+        // console.log(product.isFavorite)
+      }
+    })
+    newProducts.forEach(product => {
+      if(res.includes(product.productId)){
+        product.isFavorite=true;
+        // console.log(product.isFavorite)
+      }
+    })
+  }
 }
 </script>
 

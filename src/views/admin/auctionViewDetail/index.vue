@@ -87,7 +87,7 @@
         <img v-else src="../../../assets/icon/hide-comment.svg" alt="Toggle" class="w-6 h-6" />
       </button>
       <div v-if="showComments"
-        class="z-40 fixed top-24 right-2 w-96 max-h-[500px] min-h-[300px] bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400"
+        class="z-40 fixed top-24 right-2 w-96 min-h-[300px] bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400"
         :class="{ 'translate-x-0': showComments, 'translate-x-full': !showComments }">
         <div class="p-3 sticky top-0 bg-white z-10">
           <h2 class="text-xl font-semibold text-gray-700 mb-0">Comments</h2>
@@ -99,27 +99,31 @@
           </a-card>
         </div>
         <a-list item-layout="horizontal" :data-source="comments"
-          class="mt-5 overflow-y-scroll custom-scrollbar min-h-[200px]" id="commentsContainer">
+          class="mt-5 overflow-y-scroll custom-scrollbar min-h-[200px] max-h-[450px]" id="commentsContainer">
           <template #renderItem="{ item }">
             <a-list-item :key="item.id">
-              <a-list-item-meta :description="item.content">
+              <a-list-item-meta :description="formatContent(item.content)">
                 <template #title>
                   <a class="font-bold">{{ item.name }}</a>
+                  <div class="flex justify-between w-full">
+                    <div class="font-bold">{{ item?.userName }}</div>
+                    <div class="text-gray-500 text-xs">{{ item?.createdAt }}</div>
+                  </div>
                 </template>
                 <template #avatar>
-                  <a-avatar :src="item.avatar" />
+                  <a-avatar :src="UserIcon" class="user-icon" />
                 </template>
               </a-list-item-meta>
             </a-list-item>
           </template>
         </a-list>
-        <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
+        <!-- <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
           <input v-model="myCommentInput" @keydown.enter="handleComment" type="text" placeholder="Enter your comment..."
             class="flex-1 w-full ml-3 border p-2 rounded-lg" />
           <button @click="handleComment" class="bg-green-300 text-white p-2 rounded-lg hover:bg-green-400">
             <img src="../../../assets/icon/send.svg" alt="Next" class="w-6 h-6" />
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -132,6 +136,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { differenceInMilliseconds, differenceInSeconds, formatDistance, parse, parseISO } from 'date-fns';
 import { useStore } from 'vuex';
 import { jwtDecode } from 'jwt-decode';
+import UserIcon from "../../../assets/icon/user.svg";
 import auctionApi from '../../../api/auctions';
 import authApi from '../../../api/auths';
 import adminApi from '../../../api/admin';
@@ -383,7 +388,9 @@ const bids = ref([]);
 
 const comments = ref([]);
 
-const myCommentInput = ref('');
+const formatContent = (content) => {
+  return content.replace(/"/g, '');
+}
 
 // watchEffect(() => {
 //   nextTick(() => {
@@ -443,6 +450,9 @@ onMounted(() => {
         if(sessionState.value != "PENDING") {
           adminApi.getBidAuction(res.id, res.status).then((res) => {
             bids.value = res;
+          })
+          adminApi.getCommentAuction(res.id).then((comment) => {
+            comments.value = comment
           })
         }
     })

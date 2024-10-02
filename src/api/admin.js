@@ -89,10 +89,17 @@ const adminApi = {
   
   async getBidAuction(id, status) {
     try {
-      const token = localStorage.getItem('token');
-      const response = await api.get(`/v1/auctions/bid?auction_id=${id}&auction_status=${status}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/v1/auctions/bid?auction_id=${id}&auction_status=${status}`);
+      return response.data.data;
+    } catch(error) {
+      message.error(error.response.data.message);
+      throw error;
+    }
+  },
+  
+  async getCommentAuction(auctionId) {
+    try {
+      const response = await api.get(`/v1/auctions/comments/${auctionId}`);
       return response.data.data;
     } catch(error) {
       message.error(error.response.data.message);

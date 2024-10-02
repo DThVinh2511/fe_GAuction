@@ -75,6 +75,9 @@
         class="fixed top-20 right-2 flex justify-center items-center bg-white p-2 rounded-full border-collapse outline outline-green-400 shadow-lg z-50 h-14 w-14">
         <img v-if="!showComments" src="../../../../assets/icon/comment.svg" alt="Toggle" class="w-6 h-6" />
         <img v-else src="../../../../assets/icon/hide-comment.svg" alt="Toggle" class="w-6 h-6" />
+        <span v-if="newCommentCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+        {{ newCommentCount }}
+    </span>
       </button>
       <div v-if="showComments"
         class="z-40 fixed top-24 right-2 w-96 max-h-[500px] min-h-[300px] bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400 overflow-y-scroll custom-scrollbar"
@@ -136,9 +139,13 @@ const route = useRoute();
 const router = useRouter();
 
 const showComments = ref(false);
+const newCommentCount = ref(0);
 
 function toggleComments() {
   showComments.value = !showComments.value;
+  if (showComments.value) {
+    newCommentCount.value = 0;
+  }
 }
 
 // const props = defineProps({
@@ -363,15 +370,6 @@ const comments = ref([]);
 
 const myCommentInput = ref('');
 
-watchEffect(() => {
-  nextTick(() => {
-    const container = document.getElementById("commentsContainer");
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
-  });
-});
-
 function handleComment() {
   if (!myCommentInput.value) {
     return;
@@ -383,19 +381,24 @@ function handleComment() {
 };
 
 function addComment(data) {
-    let { commentId, userId, content } = data;
-    content = JSON.parse(content);
-    comments.value.push({ content });
-    const index = comments.value.length - 1;
-    Promise.resolve(authApi.getAnotherInfo(userId)).then((user) => {
-        comments.value[index] = { 
-            id: commentId, 
-            userId, 
-            name: user.fullName, 
-            content,
-            avatar: user.avatar
-        };
-    })
+  let { commentId, userId, content } = data;
+  if (showComments.value) {
+    newCommentCount.value = 0;
+  } else {
+    newCommentCount.value++;
+  }
+  content = JSON.parse(content);
+  comments.value.push({ content });
+  const index = comments.value.length - 1;
+  Promise.resolve(authApi.getAnotherInfo(userId)).then((user) => {
+      comments.value[index] = { 
+          id: commentId, 
+          userId, 
+          name: user.fullName, 
+          content,
+          avatar: user.avatar
+      };
+  })
 }
 
 

@@ -94,6 +94,7 @@ const profileManagement = () => {
 const handleLogout = async () => {
   try {
     const response = await store.dispatch('logout');
+    console.log("Logout : ", response);
     // message.success('You have successfully logout');
     router.push('/');
   } catch (error) {

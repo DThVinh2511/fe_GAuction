@@ -67,8 +67,11 @@ import productApi from "../../api/products";
 import Heart from '../../assets/icon/heart.svg';
 import HeartFilled from '../../assets/icon/heart-filled.svg';
 import { onUpdated } from "vue";
+import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
+
+const store = useStore();
 
 const router = useRouter();
 const loading = ref(true);
@@ -134,15 +137,17 @@ onUpdated(() => {
 });
 
 const listProductFavorite = async() => {
-  const res = await productApi.favoriteProduct();
-  console.log(products.content)
-  products.content.forEach(product => {
-    if(res.includes(product.productId)){
-      product.isFavorite=true;
-      console.log(product.isFavorite)
-    }
+  const isLoggedIn = store.getters.getLoginState;
+  if(isLoggedIn) {
+    const res = await productApi.favoriteProduct();
+    console.log(products.content)
+    products.content.forEach(product => {
+      if(res.includes(product.productId)){
+        product.isFavorite=true;
+        console.log(product.isFavorite)
+      }
+    })
   }
-  )
 }
 
 onUpdated(() => {
@@ -167,16 +172,6 @@ const isFavorited = (product) => {
 }
 
 const toggleFavorite = async (product) => {
-  //  product.isFavorite = !product.isFavorite;
-  //  if (product.isFavorite) {
-  //      product.quantity += 1;
-  //      await productApi.interestProduct(product.productId);
-
-  //    } else {
-  //      product.quantity -= 1;
-  //      // await productApi.UnInterestProduct(product.productId);
-  //    }
-
   try {
     product.isFavorite = !product.isFavorite;
     product.quantity += 1;

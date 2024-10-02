@@ -165,7 +165,7 @@ const goToAuction = (auction) => {
   const currentTime = new Date();
   // Tính sự khác biệt về giây giữa thời gian hiện tại và startTime
   const timeDifferenceInSeconds = differenceInSeconds(currentTime, startTime);
-  if((auction.status === "CLOSED" && timeDifferenceInSeconds <= 60 && timeDifferenceInSeconds > 0) || auction.status === "IN_PROGRESS") {
+  if((auction.status === "CLOSED" && timeDifferenceInSeconds <= 60) || auction.status === "IN_PROGRESS") {
     router.push({ name: 'joinAuction', params: { id: auction.id } });
   } else if(auction.status === "FINISHED") {
     message.warning("Phòng đấu giá đã kết thúc");
