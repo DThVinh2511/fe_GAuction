@@ -105,6 +105,26 @@ const adminApi = {
       message.error(error.response.data.message);
       throw error;
     }
+  },
+
+  async sendNotifycationInAuction(auctionId, message) {
+    try {
+      const response = await api.post(`/v1/auctions/${auctionId}/notify`, message);
+      return response.data.data;
+    } catch(error) {
+      message.error(error.response.data.message);
+      throw error;
+    }
+  },
+
+  async getNotifycationInAuction(auctionId) {
+    try {
+      const response = await api.get(`/v1/auctions/${auctionId}/notifycations`);
+      return response.data.data;
+    } catch(error) {
+      message.error(error.response.data.message);
+      throw error;
+    }
   }
 };
 

@@ -103,8 +103,10 @@ const nextImage = () => {
 const handleRegister = async (id) => {
   loading.value = true;
   try {
-    
     const response = await auctionApi.registerAuction(id);
+    setTimeout(() => {
+      message.success("Bạn đã đăng kí thành công");
+    }, 1000);
     emit('close');
   } catch (error) {
     message.error("You can not register!")

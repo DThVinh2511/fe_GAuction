@@ -12,3 +12,11 @@
         }
     }
 }
+.color-none {
+    color: black;
+}
+.user-icon {
+    opacity: 0.3;
+    border-radius: 50%;     /* Đảm bảo viền có hình tròn */
+    background-color: rgba(0, 0, 0, 0.4);
+}

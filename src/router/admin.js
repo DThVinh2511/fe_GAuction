@@ -1,7 +1,8 @@
 import AdminLayout from "../layouts/AdminLayout.vue";
 import AuctionManagement from "../views/admin/auctionManagement/index.vue";
 import UserManagement from "../views/admin/userManagement/index.vue";
-import AuctionViewDetail from "../views/admin/auctionViewDetail/index.vue";
+import AuctionViewFinished from "../views/admin/auctionViewFinished/index.vue";
+import AuctionViewInProgress from "../views/admin/auctionViewInProgress/index.vue";
 const adminRoutes = [
   {
     path: "/admin",
@@ -19,9 +20,15 @@ const adminRoutes = [
         component: UserManagement
       },
       {
-        path: "auction/:id",
-        name: "auctionViewDetail",
-        component: AuctionViewDetail,
+        path: "auction/finished/:id",
+        name: "AuctionViewFinished",
+        component: AuctionViewFinished,
+        props: true
+      },
+      {
+        path: "auction/in-progress/:id",
+        name: "AuctionViewInProgress",
+        component: AuctionViewInProgress,
         props: true
       }
     ]

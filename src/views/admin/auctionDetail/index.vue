@@ -28,11 +28,10 @@
           <p><strong>Description:</strong> {{ product?.description }}</p>
           <p><strong>Start Bid:</strong> {{ auction.start_bid }}</p>
           <p><strong>Stepping Price:</strong> {{ auction.price_per_step }}</p>
-          <span v-if="auction.status !== 'OPENING'">{{ auction.status }}</span>
-          <select v-else v-model="selectedStatus" class="border border-gray-300 p-1 rounded-md">
+          <select v-model="selectedStatus" class="border border-gray-300 p-1 rounded-md">
             <option value="OPENING">OPENING</option>
             <option value="CLOSE">CLOSE</option>
-            <option value="IN PROGRESS">IN PROGRESS</option>
+            <option value="IN_PROGRESS">IN PROGRESS</option>
             <option value="FINISH">FINISH</option>
             <option value="CANCELED">CANCELED</option>
           </select>
@@ -81,6 +80,7 @@ import { defineProps, defineEmits, ref, reactive, onMounted, watch } from 'vue';
 import productApi from '../../../api/products.js';
 import adminApi from '../../../api/admin.js';
 import router from '../../../router/index.js';
+import { message } from 'ant-design-vue';
 
 const loading = ref(false);
 
@@ -113,6 +113,7 @@ const getProduct = async () => {
 watch(() => props.auction, (newVal, oldVal) => {
   if (newVal) {
     getProduct();
+    selectedStatus.value = props.auction.status;
   }
 });
 
@@ -129,7 +130,14 @@ const acceptAuction = async () => {
 };
 
 const viewDetail = (auction) => {
-  router.push({ name: 'auctionViewDetail', params: { id: auction.id } });
+  if(auction.status === "FINISHED") {
+    router.push({ name: 'AuctionViewFinished', params: { id: auction.id } });
+  } else if(auction.status === "IN_PROGRESS" || auction.status === "CLOSED") {
+    router.push({ name: 'AuctionViewInProgress', params: { id: auction.id } });
+  } else if(auction.status === "PENDING") {
+    message.warning("Phòng đấu giá chưa mở");
+  }
+  
 }
 
 const closeModal = () => {
@@ -154,7 +162,7 @@ const nextImage = () => {
 };
 
 const changeStatus = async () => {
-
+  console.log(selectedStatus.value);
 };
 
 // onMounted(() => {

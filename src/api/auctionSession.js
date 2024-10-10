@@ -41,6 +41,7 @@ stompApi.setOnDisconnect(() => {
 async function joinAuctionRoom(auctionId, callbacks) {
     try {
         const response = (await httpApi.post(`/v1/auctions/${auctionId}/join`)).data.data;
+        console.log(response);
         const wasActive = response['started'];
 
         const session = {
@@ -140,6 +141,10 @@ async function getPastComments(auctionId, from) {
     return (await httpApi.get(`/v1/auctions/${auctionId}/comments${fromParam}`)).data.data;
 }
 
+async function getBidsInAuctionProgess(auctionId) {
+    return (await httpApi.get(`/v1/auctions/${auctionId}/bids`)).data.data;
+}
+
 const auctionSessionApi = {
     config,
     joinAuctionRoom,
@@ -147,7 +152,8 @@ const auctionSessionApi = {
     bid,
     comment,
     getCurrentPrice,
-    getPastComments
+    getPastComments,
+    getBidsInAuctionProgess
 }
 
 export default auctionSessionApi;
@@ -155,7 +161,13 @@ export default auctionSessionApi;
 function subscribeBid(auctionId, callbacks) {
     return stompApi.subscribe(`/topic/auction/${auctionId}/bids`, (message) => {
         const body = JSON.parse(message.body);
-        body['createdAt'] = parseDateTimeArray(body['createdAt']);
+        body['createdAt'] = formatTimeFromArray(body['createdAt']);
+        // Chuyển đổi createdAt thành định dạng ISO
+        // const createdAt = new Date(body?.createdAt?.replace(" ", "T"));
+
+        // // Định dạng lại thời gian thành HH:mm:ss
+        // const formattedTime = format(createdAt, 'HH:mm:ss');
+        // body.createdAt = formattedTime;
         callbacks.onBid?.(body);
     });
 }
@@ -163,17 +175,37 @@ function subscribeBid(auctionId, callbacks) {
 function subscribeComment(auctionId, callbacks) {
     return stompApi.subscribe(`/topic/auction/${auctionId}/comments`, (message) => {
         const body = JSON.parse(message.body);
-        body['createdAt'] = parseDateTimeArray(body['createdAt']);
+        // body['createdAt'] = parseDateTimeArray(body['createdAt']);
         callbacks.onComment?.(body);
     });
 }
 
-function parseDateTimeArray(dateArray) {
-    const [year, month, day, hour, minute, second] = dateArray;
-    return new Date(year, month - 1, day, hour, minute, second);
-}
+// function parseDateTimeArray(dateArray) {
+//     const [year, month, day, hour, minute, second] = dateArray;
+//     return new Date(year, month - 1, day, hour, minute, second);
+// }
 
 stompApi.onControlMessage('joinable', (message) => {
     config.onJoinableAuction?.(message);
 })
+
+function formatTimeFromArray(dateArray) {
+    // Kiểm tra xem dateArray có phải là mảng và có đủ 7 phần tử không
+    if (Array.isArray(dateArray) && dateArray.length === 7) {
+        const [year, month, day, hours, minutes, seconds] = dateArray;
+
+        // Tạo đối tượng Date từ mảng (tháng trong JS bắt đầu từ 0)
+        const date = new Date(year, month - 1, day, hours, minutes, seconds);
+
+        // Lấy giờ, phút, giây
+        const formattedHours = String(date.getHours()).padStart(2, '0');
+        const formattedMinutes = String(date.getMinutes()).padStart(2, '0');
+        const formattedSeconds = String(date.getSeconds()).padStart(2, '0');
+
+        // Tạo chuỗi định dạng HH:mm:ss
+        return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    } else {
+        throw new Error('Input is not a valid date array');
+    }
+}
 

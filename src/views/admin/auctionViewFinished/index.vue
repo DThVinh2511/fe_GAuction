@@ -37,48 +37,41 @@
           <p class="text-gray-700 mb-2"><strong>Stepping Price:</strong> {{ formattedSteppingPrice }}</p>
           <p class="text-gray-700 mb-2"><strong>Start Time:</strong> {{ auction.startTime ?? '?' }}</p>
           <p class="text-gray-700 mb-2"><strong>End Time:</strong> {{ auction.endTime ?? '?' }}</p>
-          <p class="text-gray-700 mb-2"><strong>End Bid:</strong> {{ auction.endBid?.toLocaleString('vi-VN') ?? '?' }}</p>
+          <p v-if="sessionState === 'FINISHED'" class="text-gray-700 mb-2"><strong>End Bid:</strong> {{ auction.endBid?.toLocaleString('vi-VN') ?? '?' }}</p>
           <p class="text-gray-700 mb-2"><strong>User created:</strong> {{ owner?.fullName ?? '?' }}</p>
-          <p class="text-gray-700 mb-2"><strong>User Victory:</strong> {{ buyer?.fullName ?? '?' }}</p>
+          <p v-if="sessionState === 'FINISHED'" class="text-gray-700 mb-2"><strong>User Victory:</strong> {{ buyer?.fullName ?? '?' }}</p>
         </div>
-        <!-- <div class="mt-auto">
-          <p :class="{ 'text-orange-500': isCurrentPriceYours, 'text-gray-700': !isCurrentPriceYours }"
-            class="text-xl mb-2">
-            <strong>Current Price:</strong> {{ formattedCurrentPrice }} VND
-          </p>
-          <div class="flex items-center mb-4 text-xl">
-            <span class="text-gray-700 mr-2"><strong>Your Price:</strong></span>
-            <input v-model="yourPriceInput" type="text" @input="adjustYourPrice" @keydown.enter="handlePlaceBid"
-              @keydown.up="increasePrice" @keydown.down="decreasePrice"
-              class="border p-2 rounded w-44 text-right font-mono" :step="steppingPrice" /> VND
-          </div>
-          <button @click="handlePlaceBid" :disabled="!biddable" :class="[biddable ? 'bg-green-500' : 'bg-gray-500']"
-            class="text-white p-2 rounded w-full">
-            Place Bid
-          </button>
-        </div> -->
       </div>
 
 
       <div class="h-full w-px bg-gray-300 ml-4"></div>
 
       <!-- list user auction -->
-      <div class="w-full md:w-1/3 bg-white p-4 flex flex-col">
+      <div class="w-full md:w-1/3 bg-white p-4 flex flex-col relative">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Latest auction updates</h2>
         <div class="border-b-2 border-gray-300 mb-4"></div>
-        <div class="overflow-y-scroll h-full custom-scrollbar p-2 flex justify-end flex-col">
-          <div v-for="(bid, index) in bids" :key="index" hoverable
-            class="h-10 text-sm w-full flex justify-start items-center shadow-md rounded-lg mb-2 p-2">
-            <!-- <a-card-meta :title="bid?.userName + ' bid ' + bid.bid.toLocaleString('vi-VN') + ' VND'"></a-card-meta> -->
-            <a-card-meta class="w-full">
-              <template #title>
-                <div class="flex justify-between w-full">
-                  <div>{{ bid?.userName + ' bid ' + bid?.bid.toLocaleString('vi-VN') + ' VND' }}</div>
-                  <div class="text-gray-500 text-xs">{{ bid?.createdAt }}</div>
-                </div>
-              </template>
-            </a-card-meta>
+        <div class="flex flex-col h-full overflow-y-hidden p-2 justify-end">
+          <div class="overflow-y-scroll custom-scrollbar scroll-smooth" ref="bidsContainer" @scroll="handleScroll">
+            <div
+              v-for="(bid, index) in bids"
+              :key="index"
+              hoverable
+              class="h-10 text-sm w-full flex justify-start items-center shadow-md rounded-lg mb-2 p-2"
+            >
+              <a-card-meta class="w-full">
+                <template #title>
+                  <div class="flex justify-between w-full">
+                    <div>{{ bid?.userName + ' bid ' + bid?.bid.toLocaleString('vi-VN') + ' VND' }}</div>
+                    <div class="text-gray-500 text-xs">{{ bid?.createdAt }}</div>
+                  </div>
+                </template>
+              </a-card-meta>
+            </div>
           </div>
+          <button v-if="showScrollDown" @click="scrollToBottom"
+            class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
+            <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" class="x19dipnz x1lliihq x1tzjh5l" style="--color: var(--mwp-primary-theme-color);"><g fill-rule="evenodd" transform="translate(-90 -248)"><path fill-rule="nonzero" d="M95.322 258.928a.75.75 0 0 0-1.06 1.06l5.208 5.209a.75.75 0 0 0 1.06 0l5.209-5.208a.75.75 0 0 0-1.06-1.06L100 263.605l-4.678-4.678z"></path><path fill-rule="nonzero" d="M99.25 251.333v12.813a.75.75 0 1 0 1.5 0v-12.813a.75.75 0 1 0-1.5 0z"></path></g></svg>
+          </button>
         </div>
       </div>
       <button @click="toggleComments"
@@ -92,38 +85,64 @@
         <div class="p-3 sticky top-0 bg-white z-10">
           <h2 class="text-xl font-semibold text-gray-700 mb-0">Comments</h2>
         </div>
-        <div class="p-2">
-          <a-card v-for="(noti, index) in notifications" :key="index" hoverable
-            class="h-96 bg-white shadow-lg rounded-lg mb-2 custom-scrollbar">
-            <a-card-meta :title="index + 1" :description="noti.content"></a-card-meta>
+        <div ref="commentsContainer">
+          <a-list item-layout="horizontal" :data-source="comments"
+          class="mt-5 overflow-y-scroll custom-scrollbar min-h-[200px] max-h-[450px] list-comment scroll-smooth" @scroll="handleScrollChat">
+            <template #renderItem="{ item }">
+              <a-list-item :key="item.id">
+                <a-list-item-meta :description="formatContent(item.content)">
+                  <template #title>
+                    <a class="font-bold">{{ item.name }}</a>
+                    <div class="flex justify-between w-full">
+                      <div class="font-bold">{{ item?.userName }}</div>
+                      <div class="text-gray-500 text-xs">{{ item?.createdAt }}</div>
+                    </div>
+                  </template>
+                  <template #avatar>
+                    <a-avatar :src="UserIcon" class="user-icon" />
+                  </template>
+                </a-list-item-meta>
+              </a-list-item>
+            </template>
+          </a-list>
+          <button v-if="showScrollDownChat" @click="scrollToBottomChat"
+            class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
+            <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" class="x19dipnz x1lliihq x1tzjh5l" style="--color: var(--mwp-primary-theme-color);"><g fill-rule="evenodd" transform="translate(-90 -248)"><path fill-rule="nonzero" d="M95.322 258.928a.75.75 0 0 0-1.06 1.06l5.208 5.209a.75.75 0 0 0 1.06 0l5.209-5.208a.75.75 0 0 0-1.06-1.06L100 263.605l-4.678-4.678z"></path><path fill-rule="nonzero" d="M99.25 251.333v12.813a.75.75 0 1 0 1.5 0v-12.813a.75.75 0 1 0-1.5 0z"></path></g></svg>
+          </button>
+        </div>
+      </div>
+      <button @click="toggleNotify"
+        class="fixed top-40 right-2 flex justify-center items-center bg-white p-2 rounded-full border-collapse outline outline-green-400 shadow-lg z-30 h-14 w-14">
+        <img v-if="!showNotify" src="../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
+        <img v-else src="../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
+      </button>
+      <div v-if="showNotify"
+        class="z-20 fixed top-44 right-2 w-96 min-h-[300px] bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400"
+        :class="{ 'translate-x-0': showNotify, 'translate-x-full': !showNotify }">
+        <div class="p-3 sticky top-0 bg-white z-10">
+          <h2 class="text-xl font-semibold text-gray-700 mb-0">Notifycations</h2>
+        </div>
+        <div class="p-2 overflow-y-scroll custom-scrollbar scroll-smooth min-h-[200px] max-h-[450px]" ref="NotifiesContainer" @scroll="handleScrollNotify">
+          <a-card v-for="(noti, index) in notifications" :key="index"
+            class="bg-white shadow-lg rounded-lg mb-2">
+            <a-card-meta>
+              <template #description class="color-none">
+                <div class="color-none">
+                  <b>ADMIN thông báo: </b>
+                  <span>{{ noti?.content }}</span>
+                </div>
+                <div class="text-gray-500 text-xs">{{ noti?.createdAt }}</div>
+              </template>
+              <template #avatar>
+                <a-avatar :src="UserIcon" class="user-icon" />
+              </template>
+            </a-card-meta>
           </a-card>
         </div>
-        <a-list item-layout="horizontal" :data-source="comments"
-          class="mt-5 overflow-y-scroll custom-scrollbar min-h-[200px] max-h-[450px]" id="commentsContainer">
-          <template #renderItem="{ item }">
-            <a-list-item :key="item.id">
-              <a-list-item-meta :description="formatContent(item.content)">
-                <template #title>
-                  <a class="font-bold">{{ item.name }}</a>
-                  <div class="flex justify-between w-full">
-                    <div class="font-bold">{{ item?.userName }}</div>
-                    <div class="text-gray-500 text-xs">{{ item?.createdAt }}</div>
-                  </div>
-                </template>
-                <template #avatar>
-                  <a-avatar :src="UserIcon" class="user-icon" />
-                </template>
-              </a-list-item-meta>
-            </a-list-item>
-          </template>
-        </a-list>
-        <!-- <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
-          <input v-model="myCommentInput" @keydown.enter="handleComment" type="text" placeholder="Enter your comment..."
-            class="flex-1 w-full ml-3 border p-2 rounded-lg" />
-          <button @click="handleComment" class="bg-green-300 text-white p-2 rounded-lg hover:bg-green-400">
-            <img src="../../../assets/icon/send.svg" alt="Next" class="w-6 h-6" />
-          </button>
-        </div> -->
+        <button v-if="showScrollDownNotify" @click="scrollToBottomNotify"
+          class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
+          <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" class="x19dipnz x1lliihq x1tzjh5l" style="--color: var(--mwp-primary-theme-color);"><g fill-rule="evenodd" transform="translate(-90 -248)"><path fill-rule="nonzero" d="M95.322 258.928a.75.75 0 0 0-1.06 1.06l5.208 5.209a.75.75 0 0 0 1.06 0l5.209-5.208a.75.75 0 0 0-1.06-1.06L100 263.605l-4.678-4.678z"></path><path fill-rule="nonzero" d="M99.25 251.333v12.813a.75.75 0 1 0 1.5 0v-12.813a.75.75 0 1 0-1.5 0z"></path></g></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -131,7 +150,7 @@
 
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watchEffect, defineProps, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watchEffect, defineProps, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { differenceInMilliseconds, differenceInSeconds, formatDistance, parse, parseISO } from 'date-fns';
 import { useStore } from 'vuex';
@@ -147,12 +166,6 @@ const store = useStore();
 
 const route = useRoute();
 const router = useRouter();
-
-const showComments = ref(false);
-
-function toggleComments() {
-  showComments.value = !showComments.value;
-}
 
 // const props = defineProps({
 //     auctionId: {
@@ -363,151 +376,120 @@ function formatPrice(priceNum) {
 
 const bids = ref([]);
 
-// async function updateBid(bid) {
-//   currentPrice.value = bid.bid;
-//   if (!bid.userId) {
-//     return;
-//   }
-//   bids.value.push({name: "xxx", price: bid.bid});
-//   const index = bids.value.length - 1;
-  
-//   if (isCurrentPriceYours.value = bid.userId === userId) {
-//     bids.value[index] = {
-//       name: 'You',
-//       price: bid.bid,
-//     }
-//   } else {
-//     authApi.getAnotherInfo(bid.userId).then((user) => {
-//       bids.value[index] = {
-//         name: user.fullName,
-//         price: bid.bid,
-//       }
-//     });
-//   }
-// }
-
 const comments = ref([]);
+const notifications = ref([]);
 
 const formatContent = (content) => {
   return content.replace(/"/g, '');
 }
 
-// watchEffect(() => {
-//   nextTick(() => {
-//     const container = document.getElementById("commentsContainer");
-//     if (container) {
-//       container.scrollTop = container.scrollHeight;
-//     }
-//   });
-// });
+const showScrollDown = ref(false);
+const showScrollDownChat = ref(false);
+const showScrollDownNotify = ref(false);
+const bidsContainer = ref(null);
+const NotifiesContainer = ref(null);
+const commentsContainer = ref(null);
 
-// function handleComment() {
-//   if (!myCommentInput.value) {
-//     return;
-//   }
-//   sessionApi.comment(auctionId, myCommentInput.value).catch((err) => {
-//     message.error(err.message);
-//   });
-//   myCommentInput.value = '';
-// };
+function scrollToBottom() {
+  nextTick(() => {
+    const container = bidsContainer.value;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+}
 
-// function addComment(data) {
-//     let { commentId, userId, content } = data;
-//     content = JSON.parse(content);
-//     comments.value.push({ content });
-//     const index = comments.value.length - 1;
-//     Promise.resolve(authApi.getAnotherInfo(userId)).then((user) => {
-//         comments.value[index] = { 
-//             id: commentId, 
-//             userId, 
-//             name: user.fullName, 
-//             content,
-//             avatar: user.avatar
-//         };
-//     })
-// }
+function scrollToBottomNotify() {
+  nextTick(() => {
+    const container = NotifiesContainer.value;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+}
 
+const showComments = ref(false);
+const showNotify = ref(false);
 
-// const notifications = ref([]);
+function toggleComments() {
+  showComments.value = !showComments.value;
+  showNotify.value = false;
+  scrollToBottomChat();
+}
+function toggleNotify() {
+  showNotify.value = !showNotify.value;
+  showComments.value = false;
+  scrollToBottomNotify();
+}
 
-// const addNotification = (data) => {
-//   notifications.value.push(data);
-// };
+function scrollToBottomChat() {
+  nextTick(() => {
+    const container = commentsContainer.value;
+    if (container) {
+      const aListElement = container.querySelector('.list-comment');
+      aListElement.scrollTop = aListElement.scrollHeight;
+    }
+  });
+}
 
+function handleScroll() {
+  const container = bidsContainer.value;
+  if (container.scrollTop + container.clientHeight < (container.scrollHeight-10)) {
+    showScrollDown.value = true; // Show scroll down button
+  } else {
+    showScrollDown.value = false; // Hide scroll down button
+  }
+}
 
-// function handleUnload() {
-//   console.log('leaving room');
-//   sessionApi.leaveAuctionRoom(auctionId);
-// };
+function handleScrollNotify() {
+  const container = NotifiesContainer.value;
+  if (container.scrollTop + container.clientHeight < (container.scrollHeight-10)) {
+    showScrollDownNotify.value = true; // Show scroll down button
+  } else {
+    showScrollDownNotify.value = false; // Hide scroll down button
+  }
+}
+
+function handleScrollChat() {
+  const container = commentsContainer.value.querySelector('.list-comment');
+  if (container.scrollTop + container.clientHeight < (container.scrollHeight-10)) {
+    showScrollDownChat.value = true; // Show scroll down button
+  } else {
+    showScrollDownChat.value = false; // Hide scroll down button
+  }
+}
 onMounted(() => {
-  // scrollToBottom();
   auctionApi.getAuctionById(auctionId)
     .then((res) => {
-        console.log(res)
-        auctionInfoRef.value = res;
-        sessionState.value = 
-            ["IN_PROGRESS", "FINISHED", "CANCELLED"].includes(res.status) ? res.status : "PENDING";
-        if(sessionState.value != "PENDING") {
-          adminApi.getBidAuction(res.id, res.status).then((res) => {
-            bids.value = res;
-          })
-          adminApi.getCommentAuction(res.id).then((comment) => {
-            comments.value = comment
-          })
-        }
+      auctionInfoRef.value = res;
+      sessionState.value = 
+          ["IN_PROGRESS", "FINISHED", "CANCELLED"].includes(res.status) ? res.status : "PENDING";
+      if(sessionState.value === "FINISHED") {
+        adminApi.getBidAuction(res.id, res.status).then((res) => {
+          bids.value = res;
+        });
+        adminApi.getCommentAuction(res.id).then((comment) => {
+          comments.value = comment;
+        });
+        adminApi.getNotifycationInAuction(res.id).then((noti) => {
+          notifications.value = noti;
+        })
+      }
     })
     .catch((err) => {
       console.error(err);
     });
-
-
-  //   const callbacks = {
-  //       onStart: () => {
-  //           sessionState.value = "IN_PROGRESS";
-  //           console.log('auction started');
-  //           sessionApi.getCurrentPrice(auctionId).then((res) => {
-  //               updateBid(res.data);
-  //           });
-  //       },
-  //       onEnd: (winnerId) => {
-  //           console.log(winnerId);
-  //           sessionState.value = "FINISHED";
-  //           console.log('auction ended');
-  //           message.success('Đấu giá đã kết thúc');
-  //           if (winnerId === userId) {
-  //               message.success(`Xin chúc mưng bạn đã thắng đấu giá`);
-  //           } else if (winnerId != null) {
-  //               authApi.getAnotherInfo(winnerId).then((user) => {
-  //                   message.success(`${user.fullName} đã chiến thắng đấu giá`);
-  //               });
-  //           }
-  //       },
-  //       onBid: updateBid,
-  //       onComment: addComment,
-  //       onNotification: addNotification
-  //   };
-
-  //   const join = () => sessionApi.joinAuctionRoom(auctionId, callbacks)
-  //   .catch((err) => {
-  //     if (err.isAxiosError && err.response) {
-  //       if (err.response.data?.message === 'da tham gia dau gia') {
-  //         sessionApi.leaveAuctionRoom(auctionId).finally(() => {
-  //           setTimeout(join, 1000);
-  //         });
-  //       } else {
-  //         message.error('loi tham gia phong dau gia');
-  //       }
-  //     }
-  //     console.error(err);
-  //   });
-  // join();
-
-  //   countdownInterval = setInterval(updateCountdown, 100);
 });
-
+watch(bids, () => {
+  scrollToBottom();
+});
+watch(comments, () => {
+  scrollToBottomChat();
+});
+watch(notifications, () => {
+  scrollToBottomNotify();
+});
 onUnmounted(() => {
-    // console.log('leaving room');
-    // clearInterval(countdownInterval);
 });
 
 </script>

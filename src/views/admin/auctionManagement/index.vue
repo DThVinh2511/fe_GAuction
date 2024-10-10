@@ -96,25 +96,7 @@ const columns = [
     dataIndex: "product_id",
     key: "product",
     visible: isDetailsVisible,
-  },
-  //   {
-  //     title: "Created At",
-  //     dataIndex: "createdAt",
-  //     key: "createdAt",
-  //     visible: isDetailsVisible,
-  //   },
-  //   {
-  //     title: "Confirm Date",
-  //     dataIndex: "confirmDate",
-  //     key: "confirmDate",
-  //     visible: isDetailsVisible,
-  //   },
-  //   {
-  //     title: "End Registration",
-  //     dataIndex: "endRegistration",
-  //     key: "endRegistration",
-  //     visible: isDetailsVisible,
-  //   },
+  }
 ];
 
 const auctions = reactive([]);
@@ -147,9 +129,6 @@ const getAllAuctions = async (currentPage) => {
 
     auctions.length = 0;
     auctions.push(...response.content);
-
-    console.log(pagination.total);
-    console.log(auctions);
   } catch (error) {
     console.log(error);
   }
@@ -186,7 +165,6 @@ const filterByTag = (tag) => {
 };
 
 watch(selectedTags, (newValue, oldValue) => {
-  console.log('Selected tags:', newValue);
 
   if (newValue.length === 0) {
     getAllAuctions();
@@ -199,6 +177,7 @@ watch(selectedTags, (newValue, oldValue) => {
 
 const closeModal = () => {
   isModalVisible.value = false;
+  getAllAuctions();
 };
 
 onMounted(() => {

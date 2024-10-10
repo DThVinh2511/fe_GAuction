@@ -7,18 +7,18 @@
             v-show="index === currentImageIndex" class="max-w-full max-h-full object-contain" />
           <button @click="prevImage"
             class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 p-2 rounded-full">
-            <img src="../../../../assets/icon/prev-arrow-slide.svg" alt="Previous" class="w-6 h-6" />
+            <img src="../../../assets/icon/prev-arrow-slide.svg" alt="Previous" class="w-6 h-6" />
           </button>
           <button @click="nextImage"
             class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 p-2 rounded-full">
-            <img src="../../../../assets/icon/next-arrow-slide.svg" alt="Next" class="w-6 h-6" />
+            <img src="../../../assets/icon/next-arrow-slide.svg" alt="Next" class="w-6 h-6" />
           </button>
         </div>
       </div>
 
       <div class="relative w-full md:w-1/3 bg-white p-4 flex flex-col mb-4 md:mb-0">
         <button @click="goBack" class="absolute -top-16 right-5 text-gray-500 hover:text-gray-700 mt-20">
-          <img src="../../../../assets/icon/cancel.svg" alt="Close" class="w-6 h-6" />
+          <img src="../../../assets/icon/cancel.svg" alt="Close" class="w-6 h-6" />
         </button>
         <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ auction.title }}</h1>
         <div class="border-b-2 border-gray-300 mb-4"></div>
@@ -37,22 +37,13 @@
           <p class="text-gray-700 mb-2"><strong>Stepping Price:</strong> {{ formattedSteppingPrice }}</p>
           <p class="text-gray-700 mb-2"><strong>Start Time:</strong> {{ auction.startTime ?? '?' }}</p>
           <p class="text-gray-700 mb-2"><strong>End Time:</strong> {{ auction.endTime ?? '?' }}</p>
+          <p class="text-gray-700 mb-2"><strong>User created:</strong> {{ owner?.fullName ?? '?' }}</p>
         </div>
         <div class="mt-auto">
           <p :class="{ 'text-orange-500': isCurrentPriceYours, 'text-gray-700': !isCurrentPriceYours }"
             class="text-xl mb-2">
             <strong>Current Price:</strong> {{ formattedCurrentPrice }} VND
           </p>
-          <div class="flex items-center mb-4 text-xl">
-            <span class="text-gray-700 mr-2"><strong>Your Price:</strong></span>
-            <input v-model="yourPriceInput" type="text" @input="adjustYourPrice" @keydown.enter="handlePlaceBid"
-              @keydown.up="increasePrice" @keydown.down="decreasePrice"
-              class="border p-2 rounded w-44 text-right font-mono" :step="steppingPrice" /> VND
-          </div>
-          <button @click="handlePlaceBid" :disabled="!biddable" :class="[biddable ? 'bg-green-500' : 'bg-gray-500']"
-            class="text-white p-2 rounded w-full">
-            Place Bid
-          </button>
         </div>
       </div>
 
@@ -89,12 +80,12 @@
       </div>
 
       <button @click="toggleComments"
-        class="fixed top-20 right-2 flex justify-center items-center bg-white p-2 rounded-full border-collapse outline outline-green-400 shadow-lg z-50 h-14 w-14">
-        <img v-if="!showComments" src="../../../../assets/icon/comment.svg" alt="Toggle" class="w-6 h-6" />
-        <img v-else src="../../../../assets/icon/hide-comment.svg" alt="Toggle" class="w-6 h-6" />
+        class="fixed top-20 right-2 flex justify-center items-center bg-white p-2 rounded-full border-collapse outline outline-green-400 shadow-lg z-50 h-14 w-14 cursor-pointer">
+        <img v-if="!showComments" src="../../../assets/icon/comment.svg" alt="Toggle" class="w-6 h-6" />
+        <img v-else src="../../../assets/icon/hide-comment.svg" alt="Toggle" class="w-6 h-6" />
         <span v-if="newCommentCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-        {{ newCommentCount }}
-    </span>
+          {{ newCommentCount }}
+        </span>
       </button>
       <div v-if="showComments"
         class="z-40 fixed top-24 right-2 w-96 bg-white pt-0 pb-0 pr-4 pl-4 shadow-lg rounded-lg transition-transform transform border-collapse outline outline-slate-400"
@@ -104,7 +95,7 @@
         </div>
         <div ref="commentsContainer">
           <a-list item-layout="horizontal" :data-source="comments"
-          class="mt-5 overflow-y-auto custom-scrollbar min-h-[200px] max-h-[350px] list-comment scroll-smooth" @scroll="handleScrollChat">
+          class="mt-5 overflow-y-auto custom-scrollbar min-h-[200px] max-h-[450px] list-comment scroll-smooth" @scroll="handleScrollChat">
             <template #renderItem="{ item }">
               <a-list-item :key="item.id">
                 <a-list-item-meta :description="formatContent(item.content)">
@@ -122,22 +113,15 @@
             </template>
           </a-list>
           <button v-if="showScrollDownChat" @click="scrollToBottomChat"
-            class="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
+            class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
             <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" class="x19dipnz x1lliihq x1tzjh5l" style="--color: var(--mwp-primary-theme-color);"><g fill-rule="evenodd" transform="translate(-90 -248)"><path fill-rule="nonzero" d="M95.322 258.928a.75.75 0 0 0-1.06 1.06l5.208 5.209a.75.75 0 0 0 1.06 0l5.209-5.208a.75.75 0 0 0-1.06-1.06L100 263.605l-4.678-4.678z"></path><path fill-rule="nonzero" d="M99.25 251.333v12.813a.75.75 0 1 0 1.5 0v-12.813a.75.75 0 1 0-1.5 0z"></path></g></svg>
-          </button>
-        </div>
-        <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
-          <input v-model="myCommentInput" @keydown.enter="handleComment" type="text" placeholder="Enter your comment..."
-            class="flex-1 w-full ml-3 border p-2 rounded-lg" />
-          <button @click="handleComment" class="bg-green-300 text-white p-2 rounded-lg hover:bg-green-400">
-            <img src="../../../../assets/icon/send.svg" alt="Next" class="w-6 h-6" />
           </button>
         </div>
       </div>
       <button @click="toggleNotify"
         class="fixed top-40 right-2 flex justify-center items-center bg-white p-2 rounded-full border-collapse outline outline-green-400 shadow-lg z-30 h-14 w-14 cursor-pointer">
-        <img v-if="!showNotify" src="../../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
-        <img v-else src="../../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
+        <img v-if="!showNotify" src="../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
+        <img v-else src="../../../assets/icon/notification-bell.svg" alt="Toggle" class="w-6 h-6" />
         <span v-if="newNotifyCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
           {{ newNotifyCount }}
         </span>
@@ -166,9 +150,16 @@
           </a-card>
         </div>
         <button v-if="showScrollDownNotify" @click="scrollToBottomNotify"
-          class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
+          class="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white p-2 rounded-full shadow-lg z-50">
           <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" class="x19dipnz x1lliihq x1tzjh5l" style="--color: var(--mwp-primary-theme-color);"><g fill-rule="evenodd" transform="translate(-90 -248)"><path fill-rule="nonzero" d="M95.322 258.928a.75.75 0 0 0-1.06 1.06l5.208 5.209a.75.75 0 0 0 1.06 0l5.209-5.208a.75.75 0 0 0-1.06-1.06L100 263.605l-4.678-4.678z"></path><path fill-rule="nonzero" d="M99.25 251.333v12.813a.75.75 0 1 0 1.5 0v-12.813a.75.75 0 1 0-1.5 0z"></path></g></svg>
         </button>
+        <div class="flex justify-center items-center sticky bottom-0 bg-white w-80 ml-3 p-4 mt-4 rounded space-x-2">
+          <input v-model="myNotifyInput" @keydown.enter="handleNotify" type="text" placeholder="Enter your notify..."
+            class="flex-1 w-full ml-3 border p-2 rounded-lg" />
+          <button @click="handleNotify" class="bg-green-300 text-white p-2 rounded-lg hover:bg-green-400">
+            <img src="../../../assets/icon/send.svg" alt="Next" class="w-6 h-6" />
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -178,16 +169,16 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watchEffect, defineProps, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { differenceInMilliseconds, differenceInSeconds, formatDistance, parse, parseISO } from 'date-fns';
+import { differenceInMilliseconds, differenceInSeconds, format, formatDate, formatDistance, parse, parseISO } from 'date-fns';
 import { useStore } from 'vuex';
 import { jwtDecode } from 'jwt-decode';
-import sessionApi from '../../../../api/auctionSession';
-import UserIcon from "../../../../assets/icon/user.svg";
-import auctionApi from '../../../../api/auctions';
-import authApi from '../../../../api/auths';
 import { message } from 'ant-design-vue';
 import { nextTick } from 'vue';
-import adminApi from '../../../../api/admin';
+import UserIcon from "../../../assets/icon/user.svg";
+import authApi from '../../../api/auths';
+import sessionApi from "../../../api/auctionSession";
+import auctionApi from '../../../api/auctions';
+import adminApi from '../../../api/admin';
 
 const IMAGE_PREFIX = import.meta.env.VITE_IMAGE_PREFIX;
 
@@ -221,11 +212,20 @@ function toggleNotify() {
 
 const auctionId = route.params.id;
 const userId = jwtDecode(localStorage.getItem('token')).id;
-console.log(userId);
 
 const auctionInfoRef = ref(null);
 const auction = computed(() => auctionInfoRef.value || {});
 const product = computed(() => auction.value.product || {});
+
+const owner = ref(null); 
+
+watch(product, async () => {
+  if (product.value.ownerId) {
+    const user = await authApi.getAnotherInfo(product.value.ownerId);
+    console.log(user);
+    owner.value = user;
+  }
+}, { immediate: true });
 
 const goBack = () => {
   router.back();
@@ -309,7 +309,6 @@ const startingPrice = computed(() => auction.value.startBid);
 const steppingPrice = computed(() => auction.value.pricePerStep);
 const currentPrice = ref(null);
 const isCurrentPriceYours = ref(false);
-const yourPriceInput = ref('0');
 
 const formattedSteppingPrice = computed(() => {
   return formatPrice(steppingPrice.value);
@@ -322,79 +321,6 @@ const formattedStartingBid = computed(() => {
 const formattedCurrentPrice = computed(() => {
   return formatPrice(currentPrice.value);
 });
-// const formattedYourPrice = computed(() => {
-//     return formatPrice(yourPrice.value);
-// });
-
-const minimumPrice = computed(() => {
-  return Math.max(startingPrice.value,
-    currentPrice.value ? currentPrice.value + steppingPrice.value : 0);
-});
-
-const biddable = computed(() => {
-  const yourPrice = parsePrice(yourPriceInput.value);
-  return sessionState.value === "IN_PROGRESS" && yourPrice >= minimumPrice.value;
-});
-
-function adjustYourPrice(event) {
-    const cleaned = event.target.value.replace(/\D/g, '');
-    const newPrice = parsePrice(cleaned);
-    const oldCursorPos = event.target.selectionStart;
-    const digitsToTheRight = event.target.value.substring(oldCursorPos).match(/\d/g)?.length || 0;
-
-  const formatted = formatPrice(newPrice);
-  let newCursorPos = formatted.length;
-  let dgcount = 0;
-  while (dgcount < digitsToTheRight && newCursorPos > 0) {
-    if (formatted[newCursorPos - 1].match(/\d/)) {
-      dgcount++;
-    }
-    newCursorPos--;
-  }
-  if (dgcount < digitsToTheRight) {
-    newCursorPos = formatted.length;
-  }
-  yourPriceInput.value = formatted;
-  setTimeout(() => {
-    event.target.setSelectionRange(newCursorPos, newCursorPos);
-  }, 0);
-};
-
-function increasePrice() {
-  if (!auctionInfoRef.value) {
-    return;
-  }
-  const yourPrice = parsePrice(yourPriceInput.value);
-  const addedPrice = yourPrice + steppingPrice.value;
-
-  const editedPrice = Math.max(minimumPrice.value, addedPrice);
-  yourPriceInput.value = formatPrice(editedPrice);
-}
-
-function decreasePrice() {
-  if (!auctionInfoRef.value) {
-    return;
-  }
-  const yourPrice = parsePrice(yourPriceInput.value);
-  const decreasedPrice = yourPrice - steppingPrice.value;
-
-  const editedPrice = Math.max(minimumPrice.value, decreasedPrice);
-  yourPriceInput.value = formatPrice(editedPrice);
-}
-
-function handlePlaceBid() {
-  if (!biddable.value) {
-    return;
-  }
-  const newPrice = parsePrice(yourPriceInput.value);
-  sessionApi.bid(auction.value.id, newPrice).catch((err) => {
-    message.error(err.message);
-  });
-};
-
-function parsePrice(priceStr) {
-  return (parseInt(priceStr.replace(/\./g, '')) || 0);
-};
 
 function formatPrice(priceNum) {
   return priceNum == null ? "" :
@@ -428,21 +354,22 @@ async function updateBid(bid) {
       }
     });
   }
+
   bids.value = [...bids.value];
 }
 
 const comments = ref([]);
 const notifications = ref([]);
-const myCommentInput = ref('');
+const myNotifyInput = ref('');
 
-function handleComment() {
-  if (!myCommentInput.value) {
+function handleNotify() {
+  if (!myNotifyInput.value) {
     return;
   }
-  sessionApi.comment(auctionId, myCommentInput.value).catch((err) => {
+  adminApi.sendNotifycationInAuction(auctionId, myNotifyInput.value).catch((err) => {
     message.error(err.message);
   });
-  myCommentInput.value = '';
+  myNotifyInput.value = '';
 };
 
 function addComment(data) {
@@ -456,15 +383,16 @@ function addComment(data) {
   comments.value.push({ content });
   const index = comments.value.length - 1;
   Promise.resolve(authApi.getAnotherInfo(userId)).then((user) => {
-      comments.value[index] = { 
-          id: commentId, 
-          userId, 
-          name: user.fullName, 
-          content,
-          avatar: user.avatar,
-          createdAt
-      };
+    comments.value[index] = { 
+      id: commentId, 
+      userId, 
+      name: user.fullName, 
+      content,
+      avatar: user.avatar,
+      createdAt
+    };
   });
+
   comments.value = [...comments.value];
 }
 
@@ -480,6 +408,7 @@ const addNotification = (data) => {
     newNotifyCount.value++;
   }
   notifications.value.push({content, createdAt});
+
   notifications.value = [...notifications.value];
 };
 
@@ -493,6 +422,8 @@ const commentsContainer = ref(null);
 function scrollToBottom() {
   nextTick(() => {
     const container = bidsContainer.value;
+    console.log(container.scrollHeight);
+    console.log(container.scrollTop);
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
@@ -520,7 +451,7 @@ function scrollToBottomChat() {
 
 function handleScroll() {
   const container = bidsContainer.value;
-  if (container.scrollTop + container.clientHeight < (container.scrollHeight-10)) {
+  if (container.scrollTop + container.clientHeight < container.scrollHeight - 10) {
     showScrollDown.value = true; // Show scroll down button
   } else {
     showScrollDown.value = false; // Hide scroll down button
@@ -529,7 +460,7 @@ function handleScroll() {
 
 function handleScrollNotify() {
   const container = NotifiesContainer.value;
-  if (container.scrollTop + container.clientHeight < (container.scrollHeight-20)) {
+  if (container.scrollTop + container.clientHeight < container.scrollHeight - 20) {
     showScrollDownNotify.value = true; // Show scroll down button
   } else {
     showScrollDownNotify.value = false; // Hide scroll down button
@@ -538,23 +469,16 @@ function handleScrollNotify() {
 
 function handleScrollChat() {
   const container = commentsContainer.value.querySelector('.list-comment');
-  console.log(container.scrollHeight);
-  console.log(container.scrollTop);
-  console.log(container.clientHeight);
-  if (container.scrollTop + container.clientHeight < (container.scrollHeight-20)) {
+  if (container.scrollTop + container.clientHeight < container.scrollHeight - 20) {
     showScrollDownChat.value = true; // Show scroll down button
   } else {
     showScrollDownChat.value = false; // Hide scroll down button
   }
 }
 
-function handleUnload() {
-  console.log('leaving room');
-  sessionApi.leaveAuctionRoom(auctionId);
-};
+
 
 onMounted(() => {
-  // scrollToBottom();
   auctionApi.getAuctionById(auctionId)
     .then((res) => {
         console.log(res)
@@ -562,34 +486,30 @@ onMounted(() => {
         sessionState.value = 
             ["IN_PROGRESS", "FINISHED", "CANCELLED"].includes(res.status) ? res.status : "PENDING";
         if (sessionState.value === "IN_PROGRESS") {
-            sessionApi.getBidsInAuctionProgess(auctionId).then((res) => {
-              res.reverse().forEach(updateBid);
-            });
             sessionApi.getPastComments(auctionId).then((comments) => {
               comments.forEach(addComment);
             });
             adminApi.getNotifycationInAuction(auctionId).then((notifies) => {
               notifies.forEach(addNotification);
-            })
+            });
+            sessionApi.getBidsInAuctionProgess(auctionId).then((res) => {
+              res.reverse().forEach(updateBid);
+            });
         }
     })
     .catch((err) => {
       console.error(err);
     });
 
-
     const callbacks = {
         onStart: () => {
           sessionState.value = "IN_PROGRESS";
-          console.log('auction started');
           sessionApi.getCurrentPrice(auctionId).then((res) => {
               updateBid(res.data);
           });
         },
         onEnd: (winnerId) => {
-          console.log(winnerId);
           sessionState.value = "FINISHED";
-          console.log('auction ended');
           message.success('Đấu giá đã kết thúc');
           if (winnerId === userId) {
             message.success(`Xin chúc mưng bạn đã thắng đấu giá`);
