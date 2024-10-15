@@ -32,7 +32,7 @@
             <option value="OPENING">OPENING</option>
             <option value="CLOSE">CLOSE</option>
             <option value="IN_PROGRESS">IN PROGRESS</option>
-            <option value="FINISH">FINISH</option>
+            <option value="FINISHED">FINISHED</option>
             <option value="CANCELED">CANCELED</option>
           </select>
         </div>
@@ -162,7 +162,20 @@ const nextImage = () => {
 };
 
 const changeStatus = async () => {
-  console.log(selectedStatus.value);
+  const status = selectedStatus.value;
+  if(props.auction.status === "IN_PROGRESS" && status === "FINISHED") {
+    loading.value = true;
+    try {
+      const response = await adminApi.updateStatusEndAuction(props.auction.id);
+      closeModal();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
+  } else {
+    message.error("You can't change status");
+  }
 };
 
 // onMounted(() => {

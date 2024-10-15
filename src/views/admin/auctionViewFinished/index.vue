@@ -129,7 +129,7 @@
               <template #description class="color-none">
                 <div class="color-none">
                   <b>ADMIN thông báo: </b>
-                  <span>{{ noti?.content }}</span>
+                  <span>{{ formatContent(noti?.content) }}</span>
                 </div>
                 <div class="text-gray-500 text-xs">{{ noti?.createdAt }}</div>
               </template>
@@ -472,6 +472,7 @@ onMounted(() => {
           comments.value = comment;
         });
         adminApi.getNotifycationInAuction(res.id).then((noti) => {
+          console.log(noti);
           notifications.value = noti;
         })
       }

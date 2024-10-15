@@ -86,6 +86,16 @@ const adminApi = {
       throw error;
     }
   },
+
+  async updateStatusEndAuction(auctionId) {
+    try {
+      const response = await api.post(`/v1/auctions/${auctionId}/end`);
+      message.success("Đã kết thúc đấu giá thành công");
+    } catch(error) {
+      message.error(error.response.data.message);
+      throw error;
+    }
+  },
   
   async getBidAuction(id, status) {
     try {
